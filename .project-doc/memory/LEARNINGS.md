@@ -11,3 +11,7 @@
 - Host-side tools reach the replica set with `directConnection=true`, because the replica set advertises the in-network host name `mongo:27017`.
 - dependency-cruiser: for npm packages the `to.path` is the resolved `node_modules/...` path, so rules match `node_modules/<name>/`, not the bare module name.
 - Validation must collect issues from params, query and body together; failing on the first group hides errors from the client.
+- NATS header values cannot contain line breaks; a Zod error message made the dead-letter publish fail until it was flattened to one line and truncated.
+- Durable consumers created with `deliver_policy: all` replay old events, so integration tests give each consumer its own event area (`<name>.>`) instead of sharing one subject.
+- A crashed relay leaves rows `claimed` until the lease expires (30 s by default); recovery is automatic, and rows already published are deduplicated by `Nats-Msg-Id`, so the stream holds one message per event.
+- `MongoUnitOfWork` uses `session.withTransaction`, which may re-run the callback on a transient error, so work inside a transaction must be safe to repeat.

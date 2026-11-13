@@ -37,9 +37,9 @@ Gate
 
 Delivers
 - Unit of work with a session transaction; outbox writer
-- Relay: change stream with persisted resume token, poll fallback, lease-based claim, JetStream publish with `Nats-Msg-Id`
+- Relay: polling loop woken early by a change stream, lease-based claim, JetStream publish with `Nats-Msg-Id`
 - JetStream stream and durable consumer base: idempotency through `processed_events`, backoff, `max_deliver`, dead-letter subject
-- `worker.ts` entry point; metrics for outbox lag, pending, DLQ depth
+- `worker.ts` entry point; `/metrics`, `/health`, `/ready` for outbox lag, pending and dead-letter depth
 
 Gate (integration tests)
 - A write produces exactly one effect even when the event is published twice

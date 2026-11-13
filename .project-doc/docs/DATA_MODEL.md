@@ -87,6 +87,8 @@ No cross-collection foreign keys are enforced by the database; the `doctors` mod
 | status | `pending` \| `claimed` \| `published` | |
 | leaseUntil | Date \| null | |
 | publishedAt | Date \| null | |
+| attempts | number | failed publish attempts |
+| claimToken | uuid \| null | identifies the relay batch that holds the row |
 
 Indexes: `{ status: 1, _id: 1 }` relay scan, `{ leaseUntil: 1 }` partial on `claimed`, `{ publishedAt: 1 }` TTL (7 days).
 

@@ -13,6 +13,11 @@ const schema = z.object({
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
   READY_TIMEOUT_MS: z.coerce.number().int().min(100).max(10000).default(2000),
   SHUTDOWN_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60000).default(10000),
+  WORKER_PORT: z.coerce.number().int().min(1).max(65535).default(9090),
+  OUTBOX_POLL_MS: z.coerce.number().int().min(50).max(60000).default(1000),
+  OUTBOX_BATCH: z.coerce.number().int().min(1).max(1000).default(100),
+  OUTBOX_LEASE_MS: z.coerce.number().int().min(100).max(300000).default(30000),
+  CONSUMER_MAX_DELIVER: z.coerce.number().int().min(1).max(20).default(5),
 });
 
 export interface AppConfig {
@@ -28,6 +33,11 @@ export interface AppConfig {
   trustProxyHops: number;
   readyTimeoutMs: number;
   shutdownTimeoutMs: number;
+  workerPort: number;
+  outboxPollMs: number;
+  outboxBatch: number;
+  outboxLeaseMs: number;
+  consumerMaxDeliver: number;
 }
 
 export class ConfigError extends Error {
@@ -56,6 +66,11 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     trustProxyHops: v.TRUST_PROXY_HOPS,
     readyTimeoutMs: v.READY_TIMEOUT_MS,
     shutdownTimeoutMs: v.SHUTDOWN_TIMEOUT_MS,
+    workerPort: v.WORKER_PORT,
+    outboxPollMs: v.OUTBOX_POLL_MS,
+    outboxBatch: v.OUTBOX_BATCH,
+    outboxLeaseMs: v.OUTBOX_LEASE_MS,
+    consumerMaxDeliver: v.CONSUMER_MAX_DELIVER,
   };
   if (v.NATS_USER !== undefined) config.natsUser = v.NATS_USER;
   if (v.NATS_PASSWORD !== undefined) config.natsPassword = v.NATS_PASSWORD;

@@ -51,6 +51,7 @@ doctrack/
 | `make check` | lint, format, typecheck, `check:arch`, unit tests, build |
 | `make test-integration` | Tests against real MongoDB, Redis and NATS |
 | `make migrate` | Ensure MongoDB indexes |
+| worker metrics | `docker compose exec worker wget -qO- http://127.0.0.1:9090/metrics` |
 
 ## Documents
 

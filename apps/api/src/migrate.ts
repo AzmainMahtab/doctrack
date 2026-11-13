@@ -1,5 +1,7 @@
 import { loadConfig } from './platform/config/index.ts';
 import { connectMongo, ensureIndexes } from './platform/database/index.ts';
+import './platform/messaging/processed-events.ts';
+import './platform/outbox/index.ts';
 
 async function main(): Promise<void> {
   const mongo = await connectMongo(loadConfig());

@@ -75,19 +75,22 @@ The domain change and the event commit together or not at all. No dual-write.
 
 ## 5. Relay
 
-- The relay tails the `outbox` collection through a **change stream** with the resume token persisted, and falls back to a **poll** (`status: pending`, ordered by `_id`) on startup and when the stream is unavailable.
-- Each event is published to JetStream with `Nats-Msg-Id = eventId`, so a retried publish inside the stream's dedup window is dropped by the broker.
-- After the broker ack, the row is marked `published`. Published rows expire through a TTL index.
-- Several relay replicas can run: each claims a batch with an atomic `findOneAndUpdate` to `claimed` with a lease timestamp, so no two relays publish the same row, and an expired lease is re-claimed.
+- The relay loop claims a batch of rows (`pending`, or `claimed` with an expired lease), ordered by `_id`. A claim is an `updateMany` that stamps a unique `claimToken` and a lease (`leaseUntil`, default 30 s); two relays can never hold the same row.
+- Each claimed row is published to JetStream at `evt.<event name>` with `Nats-Msg-Id = eventId`, so a retried publish inside the stream's 10-minute duplicate window is dropped by the broker.
+- After the publishes succeed, the batch is marked `published`. Published rows expire through a TTL index (7 days).
+- A publish failure releases the batch with a backoff lease (500 ms doubling to 60 s) and increments `attempts` on the failing row.
+- **Polling is the correctness path** (default 1 s). A change stream on `outbox` inserts only wakes the loop early, so latency is low; it is reopened with backoff on error and its resume token is not stored (D-29).
+- A relay that crashes after publishing but before marking leaves the rows `claimed`; after the lease expires any relay republishes them and the broker deduplicates.
 
 Delivery is at-least-once. Duplicates are handled at the consumer.
 
 ## 6. Consumers
 
-- One **durable consumer per subscriber** on a stream `DOCTRACK` with subjects `doctor.*`, `patient.*`. Each subscriber gets its own copy, which is the fan-out BullMQ would not give natively.
-- **Idempotency:** a `processed_events` collection with a unique `{ consumer, eventId }` index. The handler writes its effect and the marker in one transaction; a duplicate delivery hits the unique index and is acknowledged.
-- **Failure:** `max_deliver` with backoff, then the message goes to a dead-letter subject `dlq.<consumer>` and an alert metric increments.
-- **Ordering:** events for one aggregate share a subject token (`patient.<id>`); the analytics projection tolerates reordering by applying deltas, not snapshots.
+- One **durable consumer per handler** on the `DOMAIN_EVENTS` stream (`evt.>`), created with explicit acks, `ack_wait` 30 s, `max_deliver` 5 and backoff `[1 s, 5 s, 30 s, 2 min]`. Each handler gets its own copy of every event it subscribes to, which is the fan-out BullMQ would not give natively. A new consumer replays the stream from the start (D-32).
+- **Idempotency:** each message runs in one Mongo transaction that first inserts a `processed_events` marker `{ consumer, eventId }` (unique index) and then calls the handler. A duplicate marker means the event was already applied: the transaction aborts and the message is acknowledged. A handler failure rolls back both the effect and the marker.
+- **Failure:** `nak` with the backoff delay until the last allowed delivery; then the runner publishes the original payload to `dlq.<consumer>` on the `DEAD_LETTERS` stream with `Doctrack-Error`, `-Reason`, `-Deliveries`, `-Event-Id` and `-Original-Subject` headers, and terminates the source message. A malformed envelope is dead-lettered on its first delivery (D-30).
+- **Ordering:** the relay publishes in `_id` order, so the stream preserves outbox order for a single relay. Projections must not rely on it: they apply deltas, which commute.
+- **Observability:** the worker serves `/metrics` with outbox pending count, oldest pending age, published total, per-consumer pending, and dead-letter depth (D-31).
 - A reaction is an in-process handler **or** a durable consumer, never both.
 
 ## 7. Dashboard read model

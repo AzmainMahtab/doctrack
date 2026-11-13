@@ -23,7 +23,11 @@ export default tseslint.config(
   },
   {
     files: ['apps/api/src/**/*.ts'],
-    ignores: ['apps/api/src/platform/config/**', '**/*.test.ts'],
+    ignores: [
+      'apps/api/src/platform/config/**',
+      'apps/api/src/platform/testing/**',
+      '**/*.test.ts',
+    ],
     rules: {
       'no-restricted-properties': [
         'error',

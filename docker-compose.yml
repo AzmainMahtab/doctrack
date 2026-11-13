@@ -102,6 +102,13 @@ services:
     command: ['node', '--enable-source-maps', 'dist/worker.js']
     environment:
       <<: *api-env
+      WORKER_PORT: 9090
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:9090/health']
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
     depends_on:
       mongo: { condition: service_healthy }
       redis: { condition: service_healthy }
