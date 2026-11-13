@@ -31,6 +31,7 @@
 | D-25 | 2026-11-14 | `packages/contracts` is consumed as TypeScript source (no build step) and bundled into the API by tsup | One source of truth with no publish or build ordering |
 | D-26 | 2026-11-14 | MongoDB runs as a single-node replica set with keyfile auth on an internal network; Redis and NATS require passwords | Transactions need a replica set; services are never exposed publicly |
 | D-27 | 2026-11-14 | `make dev` runs infrastructure in Docker and api, worker and web on the host with hot reload; `make up` runs everything in containers | Fast feedback loop; production parity when needed |
+| D-28 | 2026-11-14 | `main` is the GitHub default branch and receives releases only (PR from `dev`); every feature and fix is a PR from `feature/<name>` into `dev` | Production stays stable; integration happens on `dev`. GitHub cannot default PRs to a non-default branch, so the base is stated explicitly |
 
 ## Open questions
 
