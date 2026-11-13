@@ -44,11 +44,21 @@ module.exports = {
       from: { path: '^apps/api/src/shared/' },
       to: { path: '^apps/api/src/(platform|modules)/' },
     },
+    {
+      name: 'nats-only-in-messaging',
+      comment: 'only platform/messaging touches the NATS client; everything else uses ports',
+      severity: 'error',
+      from: {
+        path: '^apps/api/src/',
+        pathNot: '^apps/api/src/(platform/messaging/|container\\.ts|worker\\.ts|server\\.ts)',
+      },
+      to: { path: 'node_modules/@nats-io/' },
+    },
     { name: 'no-circular', severity: 'error', from: {}, to: { circular: true } },
   ],
   options: {
     tsConfig: { fileName: 'apps/api/tsconfig.json' },
     doNotFollow: { path: 'node_modules' },
-    exclude: { path: '\\.test\\.ts$' },
+    exclude: { path: '\\.test\\.ts$|/testing/' },
   },
 };

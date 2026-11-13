@@ -32,6 +32,10 @@
 | D-26 | 2026-11-14 | MongoDB runs as a single-node replica set with keyfile auth on an internal network; Redis and NATS require passwords | Transactions need a replica set; services are never exposed publicly |
 | D-27 | 2026-11-14 | `make dev` runs infrastructure in Docker and api, worker and web on the host with hot reload; `make up` runs everything in containers | Fast feedback loop; production parity when needed |
 | D-28 | 2026-11-14 | `main` is the GitHub default branch and receives releases only (PR from `dev`); every feature and fix is a PR from `feature/<name>` into `dev` | Production stays stable; integration happens on `dev`. GitHub cannot default PRs to a non-default branch, so the base is stated explicitly |
+| D-29 | 2026-11-14 | The outbox relay is driven by polling (default 1 s); a change stream on `outbox` inserts only wakes it early. The resume token is not persisted | Correctness never depends on the stream, so a missed change event costs at most one poll interval. The claim lease, not the stream, prevents two relays publishing one row |
+| D-30 | 2026-11-14 | Dead letters go to a separate `DEAD_LETTERS` stream (`dlq.<consumer>`) published by the consumer runner at `max_deliver`, then the source message is terminated | The server only stops redelivering at `max_deliver`; it never moves the message. A separate stream has its own retention and depth metric |
+| D-31 | 2026-11-14 | The worker serves `/health`, `/ready` and `/metrics` on `WORKER_PORT` (9090), internal network only | The worker has no other HTTP surface; compose and a scraper need one |
+| D-32 | 2026-11-14 | A new durable consumer replays the whole stream (`deliver_policy: all`) | Projections can be rebuilt from history; handlers are idempotent |
 
 ## Open questions
 

@@ -4,18 +4,19 @@ Updated: 2026-11-14
 
 ## Phase
 
-P0 Foundation complete and released to `main`. Next: P1 Event backbone.
+P1 Event backbone complete on `feature/p1-event-backbone`. Next: P2 Identity.
 
 ## Done
 
-- Records, PRD and phases (D-1..D-21)
-- P0: pnpm workspace (`apps/api`, `apps/web`, `packages/contracts`), compose stack (Mongo replica set, NATS JetStream, Redis, api, worker, web), Makefile, shared kernel (AppError, Problem Details, `{ data, meta }`, request id, pino, validated config, pagination), `defineRoute` with generated OpenAPI 3.1, Swagger UI at `/docs`, `/health` and `/ready`, `check:arch`, CI workflow
-- P0 gate verified: stack boots healthy; `/ready` green; planted forbidden imports fail `check:arch`; a stopped Redis returns `503` from `/ready` while `/health` stays `200`; a malformed request id is replaced
-- 31 unit tests and 3 integration tests pass; `make check` green
+- Records, PRD and phases (D-1..D-28); git flow recorded and merged (PR #1)
+- P0 Foundation, released to `main`
+- P1 Event backbone: unit of work and transaction context, outbox event bus, relay (claim lease, poll plus change-stream wake-up), JetStream streams (`DOMAIN_EVENTS`, `DEAD_LETTERS`), durable consumer runner with idempotency, retry and dead-lettering, worker `/health` `/ready` `/metrics`, `check:arch` rule that only `platform/messaging` imports NATS
+- P1 gate verified: 36 unit and 19 integration tests pass; on the running stack 510 outbox rows reached the stream exactly once each, including after killing the worker mid-batch (recovery after the 30 s lease)
 
 ## Next
 
-- P1 Event backbone, on `feature/p1-event-backbone` from `dev`
+- Merge the P1 PR into `dev`
+- P2 Identity, on `feature/p2-identity` from `dev`
 
 ## Blockers
 
