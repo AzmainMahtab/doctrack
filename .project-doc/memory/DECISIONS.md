@@ -25,6 +25,12 @@
 | D-19 | 2026-11-14 | Doctors are never deleted; deactivation (`isActive`) is deferred and their patients are never orphaned | Brief lists no doctor delete |
 | D-20 | 2026-11-14 | Dashboard windows 7 / 30 / 90 days plus a custom range of at most 366 days | Brief gives no definition of date statistics |
 | D-21 | 2026-11-14 | Swagger UI is public on the demo; seeded admin and viewer credentials are in the README | Reviewers can try the API |
+| D-22 | 2026-11-14 | TypeScript pinned to 6.0.x | typescript-eslint 8 supports TypeScript below 6.1; 7.0 is out but not yet supported by the lint toolchain |
+| D-23 | 2026-11-14 | Manual composition root (`container.ts`), no DI framework | Explicit wiring, no decorators or reflection; ports are plain abstract classes |
+| D-24 | 2026-11-14 | `defineRoute()` declares an endpoint once: validation, handler, envelope and OpenAPI entry come from the same object | Documentation cannot drift; a test also checks nothing is mounted outside the registry |
+| D-25 | 2026-11-14 | `packages/contracts` is consumed as TypeScript source (no build step) and bundled into the API by tsup | One source of truth with no publish or build ordering |
+| D-26 | 2026-11-14 | MongoDB runs as a single-node replica set with keyfile auth on an internal network; Redis and NATS require passwords | Transactions need a replica set; services are never exposed publicly |
+| D-27 | 2026-11-14 | `make dev` runs infrastructure in Docker and api, worker and web on the host with hot reload; `make up` runs everything in containers | Fast feedback loop; production parity when needed |
 
 ## Open questions
 

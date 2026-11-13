@@ -1,0 +1,9 @@
+node_modules
+dist
+.next
+coverage
+pnpm-lock.yaml
+.project-doc/context/raw
+secrets
+.project-doc
+apps/web/next-env.d.ts

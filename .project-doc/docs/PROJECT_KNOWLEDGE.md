@@ -30,8 +30,9 @@ Decisions and their reasons: `../memory/DECISIONS.md`.
 doctrack/
 ├── AGENTS.md
 ├── Makefile
-├── docker-compose.yml
+├── docker-compose.yml  (+ docker-compose.dev.yml)
 ├── .env.example
+├── infra/mongo/
 ├── .project-doc/
 ├── apps/
 │   ├── api/        # Express modular monolith; entry points server.ts and worker.ts
@@ -40,9 +41,16 @@ doctrack/
     └── contracts/  # Zod schemas and DTO types shared by api and web
 ```
 
-## Commands (planned, Makefile)
+## Commands
 
-`make init` · `make up` · `make dev` · `make seed` · `make migrate` · `make check` · `make test` · `make test-integration`
+| Command | Purpose |
+|---------|---------|
+| `make init` | `.env` with generated secrets, Mongo keyfile, install dependencies |
+| `make up` / `make down` | Full stack in Docker; web on `:3000`, Swagger at `http://localhost:8080/docs` |
+| `make dev` | Infrastructure in Docker, api + worker + web on the host with hot reload |
+| `make check` | lint, format, typecheck, `check:arch`, unit tests, build |
+| `make test-integration` | Tests against real MongoDB, Redis and NATS |
+| `make migrate` | Ensure MongoDB indexes |
 
 ## Documents
 
