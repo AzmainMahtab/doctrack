@@ -1,6 +1,8 @@
 import type { Request, RequestHandler, Router } from 'express';
 import type { z } from '@doctrack/contracts';
+import type { CurrentUser } from '../../shared/auth/index.ts';
 import { AppError, type FieldError } from '../../shared/errors/index.ts';
+import { applyCookies, type CookieOps, type CookieSettings } from './cookies.ts';
 
 export type HttpMethod = 'get' | 'post' | 'patch' | 'put' | 'delete';
 
@@ -13,6 +15,7 @@ export interface HandlerResult {
   status?: number;
   data?: unknown;
   meta?: unknown;
+  cookies?: CookieOps;
 }
 
 type Out<S> = S extends z.ZodType ? z.output<S> : undefined;
@@ -35,6 +38,7 @@ export interface RouteSpec<
     params: Out<P>;
     query: Out<Q>;
     body: Out<B>;
+    auth: CurrentUser | undefined;
     req: Request;
   }) => Promise<HandlerResult | void>;
 }
@@ -74,8 +78,12 @@ export function defineRoute<
       params: params as Out<P>,
       query: query as Out<Q>,
       body: body as Out<B>,
+      auth: res.locals.auth as CurrentUser | undefined,
       req,
     });
+    if (result?.cookies) {
+      applyCookies(res, result.cookies, req.app.locals.cookieSettings as CookieSettings);
+    }
     const status = result?.status ?? Number(Object.keys(spec.responses)[0] ?? 200);
     if (status === 204 || !result || result.data === undefined) {
       res.status(status).end();
@@ -88,9 +96,15 @@ export function defineRoute<
   return { spec: spec as unknown as RouteDefinition['spec'], handler };
 }
 
-export function mountRoutes(router: Router, routes: readonly RouteDefinition[]): void {
+export type RouteChain = (spec: RouteDefinition['spec']) => RequestHandler[];
+
+export function mountRoutes(
+  router: Router,
+  routes: readonly RouteDefinition[],
+  chain: RouteChain = () => [],
+): void {
   for (const route of routes) {
-    router[route.spec.method](route.spec.path, route.handler);
+    router[route.spec.method](route.spec.path, ...chain(route.spec), route.handler);
   }
 }
 

@@ -1,16 +1,47 @@
+import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { createContainer } from './container.ts';
+import { createIdentityModule } from './modules/identity/index.ts';
 import { createApp, systemRoutes } from './platform/http/index.ts';
 import { installShutdown } from './platform/lifecycle.ts';
+import { RedisRateLimiter } from './platform/rate-limit/index.ts';
 
 const VERSION = '0.1.0';
 
 async function main(): Promise<void> {
   const container = await createContainer('api');
   const { config, logger } = container;
+  if (!config.jwtPrivateKeyPath) throw new Error('JWT_PRIVATE_KEY_PATH is required for the api');
 
-  const routes = [...systemRoutes(container.probes, config.readyTimeoutMs)];
-  const { app } = createApp({ config, logger, routes, version: VERSION });
+  const limiter = new RedisRateLimiter(container.redis.client);
+  const identity = createIdentityModule({
+    db: container.mongo.db,
+    redis: container.redis.client,
+    transactions: container.transactions,
+    uow: container.uow,
+    eventBus: container.eventBus,
+    clock: container.clock,
+    limiter,
+    privateKeyPem: readFileSync(config.jwtPrivateKeyPath, 'utf8'),
+    settings: {
+      accessTtlSeconds: config.accessTokenTtlSeconds,
+      refreshTtlSeconds: config.refreshTokenTtlSeconds,
+    },
+  });
+
+  const routes = [...systemRoutes(container.probes, config.readyTimeoutMs), ...identity.routes];
+  const { app } = createApp({
+    config,
+    logger,
+    routes,
+    version: VERSION,
+    cookies: {
+      secure: config.cookieSecure,
+      ...(config.cookieDomain ? { domain: config.cookieDomain } : {}),
+    },
+    authenticator: identity.authenticator,
+    limiter,
+  });
 
   const server = createServer(app);
   await new Promise<void>((resolve) => server.listen(config.port, resolve));

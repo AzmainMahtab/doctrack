@@ -119,8 +119,8 @@ The projection is rebuildable: replaying the stream (or a one-off aggregation ov
 
 - On logout, the `jti` of the access token and of the refresh token is written to Redis as `bl:<jti>` with a TTL equal to the token's remaining life (`exp - now`). The entry disappears exactly when the token would have expired anyway, so the blacklist never grows without bound.
 - The auth middleware checks `bl:<jti>` after verifying the signature and `typ`. A hit returns `401 TOKEN_REVOKED`.
-- Refresh-token reuse detection uses the same mechanism: revoking a family writes every live `jti` of that family.
-- Deactivating a user writes a `user:<id>:revoked-after` timestamp; tokens issued before it are rejected, which covers tokens whose `jti` was never seen.
+- Refresh-token reuse detection revokes the whole session: `sid:<sessionId>` is written to Redis (TTL = refresh lifetime) and every access or refresh token carrying that `sid` is rejected (D-33).
+- Deactivating a user writes `user:<id>:revoked-before` (a timestamp); tokens issued at or before it are rejected, which covers tokens whose `jti` was never seen (D-34).
 
 ### Rate limiting
 

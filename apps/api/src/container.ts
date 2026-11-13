@@ -6,11 +6,12 @@ import {
   TransactionContext,
   type MongoHandle,
 } from './platform/database/index.ts';
+import { SystemClock } from './platform/clock.ts';
 import type { Probe } from './platform/health/index.ts';
 import { createLogger, type Logger } from './platform/logger/index.ts';
 import { connectNats, JetStreamPublisher, type NatsHandle } from './platform/messaging/index.ts';
 import { OutboxEventBus } from './platform/outbox/index.ts';
-import type { EventBus, MessagePublisher, UnitOfWork } from './shared/application/index.ts';
+import type { Clock, EventBus, MessagePublisher, UnitOfWork } from './shared/application/index.ts';
 
 export interface Container {
   config: AppConfig;
@@ -22,6 +23,7 @@ export interface Container {
   uow: UnitOfWork;
   eventBus: EventBus;
   publisher: MessagePublisher;
+  clock: Clock;
   probes: Probe[];
   closers: { name: string; close: () => Promise<void> }[];
 }
@@ -43,6 +45,7 @@ export async function createContainer(processName: 'api' | 'worker'): Promise<Co
     uow: new MongoUnitOfWork(mongo.client, transactions),
     eventBus: new OutboxEventBus(mongo.db, transactions),
     publisher: new JetStreamPublisher(nats.connection),
+    clock: new SystemClock(),
     probes: [mongo.probe, redis.probe, nats.probe],
     closers: [
       { name: 'nats', close: nats.close },

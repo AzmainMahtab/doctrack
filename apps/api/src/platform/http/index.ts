@@ -5,3 +5,5 @@ export * from './openapi.ts';
 export * from './problem.ts';
 export * from './request-id.ts';
 export * from './system.routes.ts';
+export * from './cookies.ts';
+export * from './pipeline.ts';
