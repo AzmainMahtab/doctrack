@@ -10,7 +10,8 @@ All durable project records live in `.project-doc/`. Plain Markdown, no tool-spe
 2. `.project-doc/status/STATUS.md` — where the work stands right now
 3. `.project-doc/memory/DECISIONS.md` — decisions already made and open questions
 4. `.project-doc/docs/ARCHITECTURE.md` — modules, event flow, processes
-5. `.project-doc/plan/BACKLOG.md` — ordered work
+5. `.project-doc/docs/PRD.md` — requirements and acceptance criteria
+6. `.project-doc/plan/PHASES.md` — phases and gates
 
 ## Update as work lands
 

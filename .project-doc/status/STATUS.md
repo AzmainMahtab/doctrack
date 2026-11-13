@@ -4,18 +4,17 @@ Updated: 2026-11-14
 
 ## Phase
 
-Architecture drafted, awaiting review. No code yet.
+Planning complete. No application code yet.
 
 ## Done
 
-- Repository initialised (`dev` branch), no commits
-- `.project-doc/` created: brief, business context, requirements, data model, API contract, architecture, backlog, decisions
-- D-3..D-17 recorded (token blacklist, per-endpoint rate limiting, response/error envelope, Swagger added 2026-11-14): app shape, layout, modular monolith, outbox + NATS JetStream, auth and RBAC, patient schema, web data strategy, deploy
+- Records: brief, business context, requirements, data model, API contract, architecture
+- Decisions D-1..D-21; no open questions
+- PRD (`docs/PRD.md`) and development phases (`plan/PHASES.md`)
 
 ## Next
 
-- Review `docs/ARCHITECTURE.md` together; close OQ-6..7
-- Then backlog section 1: foundation
+- P0 Foundation, on `feature/p0-foundation` from `dev`
 
 ## Blockers
 

@@ -22,10 +22,10 @@
 | D-16 | 2026-11-14 | Success `{ data, meta? }`; errors are RFC 9457 Problem Details with stable `code`, `requestId`, and fixed-type `errors` / `retryAfter` | A standard, predictable error shape |
 | D-17 | 2026-11-14 | OpenAPI 3.1 generated from the Zod contracts, Swagger UI at `/docs`, contract test against registered routes | Documentation cannot drift from behaviour |
 | D-18 | 2026-11-14 | Redis is a hard dependency with no fail-open path: when it is down, login and authenticated routes return `503` | A limiter that fails open invites brute force; a blacklist that fails open honours logged-out tokens |
+| D-19 | 2026-11-14 | Doctors are never deleted; deactivation (`isActive`) is deferred and their patients are never orphaned | Brief lists no doctor delete |
+| D-20 | 2026-11-14 | Dashboard windows 7 / 30 / 90 days plus a custom range of at most 366 days | Brief gives no definition of date statistics |
+| D-21 | 2026-11-14 | Swagger UI is public on the demo; seeded admin and viewer credentials are in the README | Reviewers can try the API |
 
 ## Open questions
 
-| ID | Question | Default if unanswered |
-|----|----------|-----------------------|
-| OQ-6 | Is a doctor ever deleted? Brief lists no doctor delete | No delete; doctors can be deactivated. Their patients are never orphaned |
-| OQ-7 | Does the dashboard need a date-range picker or fixed windows (7 / 30 / 90 days)? | Fixed windows plus a custom range |
+None.

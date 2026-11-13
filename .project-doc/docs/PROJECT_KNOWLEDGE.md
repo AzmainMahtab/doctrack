@@ -48,11 +48,13 @@ doctrack/
 
 | File | Purpose |
 |------|---------|
+| `PRD.md` | Product requirements with acceptance criteria |
 | `ARCHITECTURE.md` | Modules, layers, event flow, processes, failure handling |
 | `REQUIREMENTS.md` | Requirement IDs traced to the brief, out-of-scope list, assumptions |
 | `DATA_MODEL.md` | Collections, fields, indexes, query rules |
 | `API_CONTRACT.md` | Endpoints |
-| `../plan/BACKLOG.md` | Ordered work |
+| `../plan/PHASES.md` | Development phases P0–P7 with gates |
+| `../plan/BACKLOG.md` | Phase checklist |
 | `../status/STATUS.md` | Current state |
 
 ## Non-negotiables
