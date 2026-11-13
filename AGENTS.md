@@ -27,5 +27,5 @@ Stale status is worse than none.
 - Every requirement traces to `.project-doc/context/raw/`. Anything not in the brief is a labelled assumption in `docs/REQUIREMENTS.md`.
 - No comments in code unless asked.
 - Never commit unless asked. Never commit on `dev` or `main`; branch `feature/<name>` first.
-- Branch flow: feature → `dev` → `main` (production only).
+- Branch flow: `feature/<name>` → PR into `dev` → release PR from `dev` into `main`. `main` is the default branch and holds releases only; never open a feature PR against it (`gh pr create --base dev`). Never commit directly on `dev` or `main`.
 - Run the stack's quality gate (lint + typecheck + tests) before declaring work done.
