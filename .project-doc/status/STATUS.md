@@ -4,7 +4,7 @@ Updated: 2026-11-14
 
 ## Phase
 
-P0 Foundation complete on `feature/p0-foundation` (not yet committed). Next: P1 Event backbone.
+P0 Foundation complete and released to `main`. Next: P1 Event backbone.
 
 ## Done
 
