@@ -10,6 +10,8 @@ Agent-, model- and harness-agnostic records for Doctor Tracker.
 | `docs/REQUIREMENTS.md` | Traceable requirement list with source references and assumptions |
 | `docs/DATA_MODEL.md` | MongoDB collections, fields, indexes |
 | `docs/API_CONTRACT.md` | REST endpoints |
+| `design/DESIGN-GUIDELINES.md` | Design system |
+| `design/pages/` | Page specs for login, dashboard, doctors, doctor detail, patients |
 | `plan/BACKLOG.md` | Ordered execution backlog |
 | `status/STATUS.md` | Current state of the work |
 | `memory/DECISIONS.md` | Decisions and open questions |
