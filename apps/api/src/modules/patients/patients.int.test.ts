@@ -84,6 +84,7 @@ describe('patients API', () => {
         doctorId: d1,
         condition: 'stable',
         admittedAt: '2026-11-01T09:30:00.000Z',
+        registeredOn: new Date().toISOString().slice(0, 10),
       });
     });
 
@@ -269,7 +270,11 @@ describe('patients API', () => {
       expect(del.text).toBe('');
       expect((await admin.get(`${API}/patients/${id}`)).status).toBe(404);
       const removed = (await events('patient.removed')).find((e) => e.aggregateId === id);
-      expect(removed?.payload).toEqual({ doctorId: d1, condition: 'recovered' });
+      expect(removed?.payload).toEqual({
+        doctorId: d1,
+        condition: 'recovered',
+        registeredOn: new Date().toISOString().slice(0, 10),
+      });
       expect((await admin.delete(`${API}/patients/${id}`)).status).toBe(404);
     });
 

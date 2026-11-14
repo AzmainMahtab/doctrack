@@ -39,6 +39,7 @@ describe('toEnvelope', () => {
       aggregateId: 'p-1',
       occurredAt: '2026-11-14T10:00:00.000Z',
       correlationId: 'req-1',
+      actorId: null,
       payload: { name: 'Ada' },
     });
   });

@@ -37,6 +37,7 @@ describe('Patient', () => {
       doctorId: 'd-1',
       condition: 'critical',
       admittedAt: '2026-11-01T09:30:00.000Z',
+      registeredOn: '2026-11-14',
     });
   });
 
@@ -84,7 +85,11 @@ describe('Patient', () => {
     patient.remove();
     const events = patient.pullEvents();
     expect(events.map((e) => e.name)).toEqual(['patient.removed']);
-    expect(events[0]?.payload).toEqual({ doctorId: 'd-1', condition: 'recovered' });
+    expect(events[0]?.payload).toEqual({
+      doctorId: 'd-1',
+      condition: 'recovered',
+      registeredOn: '2026-11-14',
+    });
   });
 
   it('never puts personal data in event payloads', () => {

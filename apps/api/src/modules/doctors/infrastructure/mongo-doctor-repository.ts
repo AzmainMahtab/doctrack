@@ -6,7 +6,12 @@ import { Page, PaginationParams } from '../../../shared/pagination/index.ts';
 import { countMatching } from '../../../platform/database/index.ts';
 import { searchTokens, sortKey } from '../../../shared/text/index.ts';
 import type { Doctor, DoctorProps } from '../domain/doctor.ts';
-import { DoctorRepository, type DoctorRow } from '../domain/ports.ts';
+import {
+  DoctorRepository,
+  type DayCount,
+  type DoctorRow,
+  type RankedDoctor,
+} from '../domain/ports.ts';
 import { buildDoctorFilter, doctorSort } from './doctor-queries.ts';
 
 export const DOCTORS = 'doctors';
@@ -118,5 +123,36 @@ export class MongoDoctorRepository extends DoctorRepository {
       { $inc: { patientCount: delta } },
       sessionOptions(this.context),
     );
+  }
+
+  countAll(): Promise<number> {
+    return this.doctors.countDocuments({}, sessionOptions(this.context));
+  }
+
+  async registrationsByDay(): Promise<DayCount[]> {
+    const rows = await this.doctors
+      .aggregate<{ _id: string; count: number }>(
+        [
+          {
+            $group: {
+              _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: 'UTC' } },
+              count: { $sum: 1 },
+            },
+          },
+          { $sort: { _id: 1 } },
+        ],
+        sessionOptions(this.context),
+      )
+      .toArray();
+    return rows.map((r) => ({ date: r._id, count: r.count }));
+  }
+
+  async topByPatientCount(limit: number): Promise<RankedDoctor[]> {
+    const docs = await this.doctors
+      .find({}, { projection: { name: 1, patientCount: 1 }, ...sessionOptions(this.context) })
+      .sort({ patientCount: -1, _id: -1 })
+      .limit(limit)
+      .toArray();
+    return docs.map((d) => ({ id: d._id, name: d.name, patientCount: d.patientCount }));
   }
 }

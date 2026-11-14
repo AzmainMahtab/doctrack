@@ -1,4 +1,4 @@
-.PHONY: help init up down dev dev-down logs ps migrate seed check test test-integration build clean
+.PHONY: help init up down dev dev-down logs ps migrate seed rebuild-analytics check test test-integration build clean
 
 -include .env
 export
@@ -63,6 +63,9 @@ migrate: ## Ensure MongoDB indexes
 seed: ## Create the demo admin and viewer accounts (stack must be up)
 	$(COMPOSE) run --rm api node dist/seed.js
 
+rebuild-analytics: ## Recompute the dashboard read model from the data (ARGS=--check only verifies)
+	$(COMPOSE) run --rm worker node dist/rebuild-analytics.js $(ARGS)
+
 check: ## Full quality gate: lint, format, typecheck, architecture, unit tests, build
 	pnpm check
 
@@ -71,7 +74,7 @@ test: ## Unit tests
 
 test-integration: ## Integration tests against real MongoDB, Redis and NATS
 	$(COMPOSE_DEV) up -d --wait $(INFRA)
-	@$(HOST_ENV) NODE_ENV=test pnpm test:integration
+	@$(HOST_ENV) NODE_ENV=test pnpm test:integration $(TEST)
 
 build: ## Build every workspace
 	pnpm build

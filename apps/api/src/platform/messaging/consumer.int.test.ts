@@ -38,6 +38,7 @@ describe('durable consumers', () => {
     aggregateId: `agg-${id}`,
     occurredAt: new Date().toISOString(),
     correlationId: null,
+    actorId: null,
     payload: {},
   });
   const send = (e: EventEnvelope, messageId: string) =>

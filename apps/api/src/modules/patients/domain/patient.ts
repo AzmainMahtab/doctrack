@@ -1,5 +1,6 @@
 import type { Condition, Gender } from '@doctrack/contracts';
 import { AggregateRoot } from '../../../shared/domain/index.ts';
+import { utcDay } from '../../../shared/time/index.ts';
 import {
   PatientConditionChanged,
   PatientRegistered,
@@ -73,6 +74,7 @@ export class Patient extends AggregateRoot {
         doctorId: patient.current.doctorId,
         condition: patient.current.condition,
         admittedAt: patient.current.admittedAt.toISOString(),
+        registeredOn: utcDay(patient.current.createdAt),
       }),
     );
     return patient;
@@ -116,6 +118,7 @@ export class Patient extends AggregateRoot {
       new PatientRemoved(this.current.id, {
         doctorId: this.current.doctorId,
         condition: this.current.condition,
+        registeredOn: utcDay(this.current.createdAt),
       }),
     );
   }

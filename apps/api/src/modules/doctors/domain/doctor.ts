@@ -1,4 +1,5 @@
 import { AggregateRoot } from '../../../shared/domain/index.ts';
+import { utcDay } from '../../../shared/time/index.ts';
 import { DoctorRegistered } from './events.ts';
 
 export interface DoctorProps {
@@ -44,6 +45,7 @@ export class Doctor extends AggregateRoot {
       new DoctorRegistered(input.id, {
         specialization: doctor.props.specialization,
         hospital: doctor.props.hospital,
+        registeredOn: utcDay(input.now),
       }),
     );
     return doctor;

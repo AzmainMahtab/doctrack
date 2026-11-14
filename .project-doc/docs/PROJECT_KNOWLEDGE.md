@@ -52,6 +52,8 @@ doctrack/
 | `make test-integration` | Tests against real MongoDB, Redis and NATS |
 | `make migrate` | Ensure MongoDB indexes |
 | `make seed` | Create the demo accounts `admin@doctrack.dev` and `viewer@doctrack.dev` (passwords from `SEED_*` in `.env`) |
+| `make rebuild-analytics` | Recompute the dashboard read model; `ARGS=--check` only verifies |
+| `make test-integration TEST=<name>` | Run one integration file |
 | worker metrics | `docker compose exec worker wget -qO- http://127.0.0.1:9090/metrics` |
 
 ## Documents

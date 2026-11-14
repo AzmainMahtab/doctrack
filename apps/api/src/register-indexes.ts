@@ -1,3 +1,4 @@
+import './modules/audit/index.ts';
 import './modules/doctors/index.ts';
 import './modules/identity/index.ts';
 import './modules/patients/index.ts';

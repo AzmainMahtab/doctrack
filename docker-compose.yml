@@ -22,6 +22,10 @@ x-api-env: &api-env
 services:
   mongo:
     image: mongo:8
+    ulimits:
+      nofile:
+        soft: 64000
+        hard: 64000
     entrypoint: ['/infra/entrypoint.sh']
     command: ['mongod', '--replSet', 'rs0', '--keyFile', '/data/configdb/keyfile', '--bind_ip_all']
     environment:

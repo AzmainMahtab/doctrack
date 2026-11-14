@@ -6,7 +6,7 @@ The ordered work is in `PHASES.md` (P0–P7), each phase with its deliverables a
 - [x] P1 Event backbone
 - [x] P2 Identity
 - [x] P3 Doctors and patients API
-- [ ] P4 Analytics and audit
+- [x] P4 Analytics and audit
 - [ ] P5 Design system
 - [ ] P6 Web app
 - [ ] P7 Hardening and delivery

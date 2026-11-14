@@ -30,6 +30,7 @@ export const toEnvelope = (doc: OutboxDoc): EventEnvelope => ({
   aggregateId: doc.aggregateId,
   occurredAt: doc.meta.occurredAt.toISOString(),
   correlationId: doc.meta.correlationId,
+  actorId: doc.meta.actorId,
   payload: doc.payload,
 });
 

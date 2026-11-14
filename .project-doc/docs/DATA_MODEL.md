@@ -105,30 +105,23 @@ Indexes: `{ status: 1, _id: 1 }` relay scan, `{ leaseUntil: 1 }` partial on `cla
 
 `{ consumer, eventId }` unique, `{ processedAt: 1 }` TTL (30 days). Written in the same transaction as the consumer's effect.
 
-## analytics_daily
-
-| Field | Type |
-|-------|------|
-| _id | `"<yyyy-mm-dd>:<doctorId>:<condition>"` |
-| date | Date (day) |
-| doctorId | uuid |
-| condition | enum |
-| registered | number |
-| removed | number |
-
-Indexes: `{ date: 1 }`, `{ doctorId: 1, date: 1 }`.
-
 ## analytics_totals
 
-Single document `{ _id: "totals", doctors, patients, updatedAt }`, incremented with `$inc`.
+One document `{ _id: "totals", doctors, patients, conditions: { stable, under_observation, critical, recovered }, updatedAt }`, changed only with `$inc` by the projection consumer, or replaced by `make rebuild-analytics`. Reads clamp negative values to 0.
+
+## analytics_daily
+
+One document per UTC day: `{ _id: "YYYY-MM-DD", patients, doctors }`, the number of records that currently exist and were registered that day (D-45). The bucket is the event's `registeredOn`. The sum over all days equals the totals. Indexed by `_id` only; range reads use the `_id` range.
 
 ## audit_log
 
-Append-only: `{ _id, eventType, aggregateId, actorId, correlationId, occurredAt, payload }`. Indexes: `{ aggregateId: 1, occurredAt: -1 }`, `{ occurredAt: -1 }`.
+Append-only, one row per event: `{ _id: eventId, eventType, aggregateId, actorId, correlationId, occurredAt, payload }`.
+
+Indexes: `{ aggregateId: 1, occurredAt: -1 }`, `{ occurredAt: -1 }`, TTL `{ occurredAt: 1 }` after 365 days.
 
 ## Query rules
 
 - Lists use page + limit (capped at 100). `total` is `countDocuments(filter)`, or `estimatedDocumentCount()` when there is no filter (D-43). Every list uses a projection.
-- Dashboard reads `analytics_*`, never `patients` or `doctors` in bulk.
+- Dashboard reads `analytics_*` and the top of `doctors.patientCount`, never `patients` or `doctors` in bulk.
 - Every hot query is checked with `explain("executionStats")` in an integration test that fails on `COLLSCAN`.
 - All writes that emit events use a session transaction that includes the outbox insert.

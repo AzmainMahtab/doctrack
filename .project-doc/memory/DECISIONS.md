@@ -48,6 +48,15 @@
 | D-42 | 2026-11-14 | `DoctorDirectory` is declared in the patients module and implemented by an adapter that imports the doctors module's `index.ts` | The consumer owns its port; the module boundary rule is respected |
 | D-43 | 2026-11-14 | An unfiltered list total uses `estimatedDocumentCount()`; filtered totals use `countDocuments(filter)` | A full count of an unfiltered collection is a collection scan; the metadata count is constant time |
 | D-44 | 2026-11-14 | Durable consumer names use hyphens, not dots (`doctors-patient-count`) | NATS rejects `.` in durable names |
+| D-45 | 2026-11-14 | The read model is `analytics_totals` (one document: doctors, patients, per-condition counts) and `analytics_daily` (one document per UTC day counting records that currently exist and were registered that day). A removal decrements the registration day | A rebuild from the source collections is exact, the daily counts sum to the total, and the dashboard reads O(days) rows |
+| D-46 | 2026-11-14 | `doctor.registered`, `patient.registered` and `patient.removed` carry `registeredOn` (UTC date of `createdAt`); the projection buckets by it, not by `occurredAt` | A midnight boundary cannot separate an event from its record |
+| D-47 | 2026-11-14 | Patients per doctor is the top N of `doctors.patientCount` through the doctors module's public API, not a second counter | One source of truth; served by the `{patientCount:-1,_id:-1}` index |
+| D-48 | 2026-11-14 | Dashboard responses are cached in Redis for 30 s under a versioned key; the projection consumer bumps the version in an `afterCommit` hook, after its transaction commits | Reads stay cheap and are fresh within the poll interval; invalidating before commit could cache stale data. The cache namespace is configurable so environments sharing a Redis cannot read each other's entries |
+| D-49 | 2026-11-14 | `make rebuild-analytics` (`ARGS=--check` verifies only) recomputes the projection from the source collections in one transaction after waiting for the outbox and the projection consumer to be idle | Repairs drift and bulk-loads data written without events. A write committed between the idle check and the snapshot can be counted twice; `--check` reports it |
+| D-50 | 2026-11-14 | The event envelope carries a nullable `actorId`, taken from the authenticated request; the audit log records one row per event keyed by event id, kept 365 days | Who did what, without personal data in events |
+| D-51 | 2026-11-14 | Modules expose read-only public APIs (`DoctorsPublicApi`, `PatientsPublicApi`) for counts and rankings; analytics never reads another module's collections | Module boundaries hold for the rebuild too |
+| D-52 | 2026-11-14 | The MongoDB container runs with `nofile` 64000 | At 1,024 open files MongoDB stopped accepting connections during the integration run |
+| D-53 | 2026-11-14 | Identity events carry no email address (`user.logged_in` has the role only; `user.deactivated` is empty) | Event payloads flow into the stream and the audit log; personal data stays out |
 
 ## Open questions
 

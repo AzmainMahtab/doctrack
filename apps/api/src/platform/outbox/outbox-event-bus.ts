@@ -29,6 +29,7 @@ export class OutboxEventBus extends EventBus {
       );
     }
     const correlationId = requestContext.requestId() ?? null;
+    const actorId = requestContext.actorId() ?? null;
     await this.collection.insertMany(
       events.map((event): OutboxDoc => ({
         _id: event.id,
@@ -39,7 +40,7 @@ export class OutboxEventBus extends EventBus {
           correlationId,
           occurredAt: event.occurredAt,
           version: event.version,
-          actorId: null,
+          actorId,
         },
         status: 'pending',
         attempts: 0,

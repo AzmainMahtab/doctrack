@@ -95,16 +95,19 @@ Delivery is at-least-once. Duplicates are handled at the consumer.
 
 ## 7. Dashboard read model
 
-`analytics_daily` holds one document per `{ date, doctorId, condition }` with counters (`registered`, `removed`). The dashboard queries read O(days × doctors) pre-aggregated rows, not O(patients).
+The projection consumer (`analytics-projection`) applies commutative deltas from `doctor.registered`, `patient.registered`, `patient.removed` and `patient.condition_changed` (D-45, D-46).
 
 | Widget | Source |
 |--------|--------|
-| Total doctors / patients | `analytics_totals` (single document, incremented) |
-| Patients per doctor | `doctors.patientCount`, top N by index |
-| Date-based statistics | `analytics_daily`, grouped by `$dateTrunc` |
-| Condition breakdown | `analytics_daily` grouped by `condition` |
+| Total doctors / patients | `analytics_totals` |
+| Condition breakdown | `analytics_totals.conditions` |
+| Date-based statistics | `analytics_daily`, grouped into day, week or month buckets in memory (at most 366 rows) |
+| Patients per doctor | top N of `doctors.patientCount`, through the doctors module's public API (D-47) |
 
-The projection is rebuildable: replaying the stream (or a one-off aggregation over `patients`) reproduces it. The projection can lag by milliseconds, and the UI states "updated at".
+- Responses are cached in Redis for 30 s under a versioned key; the consumer bumps the version after its transaction commits, so a read after an applied event is fresh (D-48).
+- The projection can lag by about one relay poll interval; the totals include an `updatedAt`.
+- `make rebuild-analytics` recomputes the projection from the source collections and `--check` reports drift (D-49).
+- The audit consumer (`audit-log`) records every event with its actor (D-50).
 
 ## 8. Authentication and authorization
 

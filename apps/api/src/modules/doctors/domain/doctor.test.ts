@@ -23,6 +23,7 @@ describe('Doctor', () => {
     expect(events[0]?.payload).toEqual({
       specialization: 'Cardiology',
       hospital: 'St. Mary Hospital',
+      registeredOn: '2026-11-14',
     });
   });
 });
