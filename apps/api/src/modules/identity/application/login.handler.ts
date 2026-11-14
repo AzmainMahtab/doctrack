@@ -88,9 +88,7 @@ export class LoginHandler {
         familyId: sessionId,
         expiresAt: refresh.expiresAt,
       });
-      await this.eventBus.publish(
-        new UserLoggedIn(user.id, { email: user.email, role: user.role }),
-      );
+      await this.eventBus.publish(new UserLoggedIn(user.id, { role: user.role }));
     });
 
     return {

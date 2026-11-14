@@ -147,12 +147,16 @@ Redis is a hard dependency (blacklist and limiter). When it is down, login and e
 
 ## Dashboard
 
-| Method | Path | Permission | Purpose |
-|--------|------|-----------|---------|
-| GET | `/dashboard/summary` | `dashboard:read` | total doctors, total patients |
-| GET | `/dashboard/patients-per-doctor` | `dashboard:read` | counts per doctor, top N |
-| GET | `/dashboard/timeseries` | `dashboard:read` | created per period. Query: `entity`, `interval=day,week,month`, `from`, `to` |
-| GET | `/dashboard/conditions` | `dashboard:read` | patients grouped by condition |
+All dashboard routes need `dashboard:read` and are cached for 30 s (refreshed as soon as the projection consumes an event).
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/dashboard/summary` | `{ doctors, patients, updatedAt }` |
+| GET | `/dashboard/patients-per-doctor` | top doctors by patient count. Query: `limit` (1–20, default 10). Rows `{ doctorId, name, patientCount }` |
+| GET | `/dashboard/timeseries` | `{ entity, interval, from, to, points: [{ date, count }] }`. Query: `entity` (`patients` default, `doctors`), `interval` (`day` default, `week`, `month`), and either `window` (7, 30 default, 90 days ending today) or `from` and `to` (at most 366 days). Gaps are zero-filled; week buckets start on Monday, month buckets on the 1st, both labelled by their start date |
+| GET | `/dashboard/conditions` | `{ counts: { stable, under_observation, critical, recovered }, total }` |
+
+A series counts records that currently exist, by the day they were registered.
 
 ## Operational
 

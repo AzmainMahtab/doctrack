@@ -7,9 +7,23 @@ export type DoctorRow = Pick<
   'id' | 'name' | 'specialization' | 'hospital' | 'patientCount' | 'createdAt'
 >;
 
+export interface DayCount {
+  date: string;
+  count: number;
+}
+
+export interface RankedDoctor {
+  id: string;
+  name: string;
+  patientCount: number;
+}
+
 export abstract class DoctorRepository {
   abstract insert(doctor: Doctor): Promise<void>;
   abstract findById(id: string): Promise<DoctorProps | null>;
   abstract list(query: DoctorListQuery): Promise<Page<DoctorRow>>;
   abstract adjustPatientCount(id: string, delta: number): Promise<void>;
+  abstract countAll(): Promise<number>;
+  abstract registrationsByDay(): Promise<DayCount[]>;
+  abstract topByPatientCount(limit: number): Promise<RankedDoctor[]>;
 }

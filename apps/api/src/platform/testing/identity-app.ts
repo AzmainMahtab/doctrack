@@ -1,5 +1,6 @@
 import { generateKeyPairSync } from 'node:crypto';
 import { z } from '@doctrack/contracts';
+import { createAnalyticsModule } from '../../modules/analytics/index.ts';
 import { createDoctorsModule } from '../../modules/doctors/index.ts';
 import { createIdentityModule } from '../../modules/identity/index.ts';
 import { createPatientsModule } from '../../modules/patients/index.ts';
@@ -70,12 +71,23 @@ export async function createIdentityApp(h: Harness, options: IdentityAppOptions 
   };
   const doctors = createDoctorsModule(domain);
   const patients = createPatientsModule({ ...domain, doctors: doctors.api });
+  const analytics = createAnalyticsModule({
+    db: h.mongo.db,
+    redis: redis.client,
+    transactions: h.transactions,
+    uow: h.uow,
+    clock: new SystemClock(),
+    doctors: doctors.api,
+    patients: patients.api,
+    cacheNamespace: `dash-test:${h.config.mongoDb}`,
+  });
 
   const routes = [
     ...systemRoutes([h.mongo.probe, redis.probe], 500),
     ...identity.routes,
     ...doctors.routes,
     ...patients.routes,
+    ...analytics.routes,
     ...fixtures,
   ];
   const built = createApp({
@@ -88,7 +100,7 @@ export async function createIdentityApp(h: Harness, options: IdentityAppOptions 
     limiter,
     policies: { ...defaultPolicies, ...options.policies },
   });
-  return { ...built, identity, doctors, patients, redis, routes };
+  return { ...built, identity, doctors, patients, analytics, redis, routes };
 }
 
 export async function connectOwnRedis(h: Harness): Promise<RedisHandle> {

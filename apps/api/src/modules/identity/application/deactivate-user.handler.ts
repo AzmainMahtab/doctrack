@@ -20,7 +20,7 @@ export class DeactivateUserHandler {
     user.deactivate();
     await this.uow.withTransaction(async () => {
       await this.users.save(user);
-      await this.eventBus.publish(new UserDeactivated(user.id, { email: user.email }));
+      await this.eventBus.publish(new UserDeactivated(user.id, {}));
     });
     await this.blacklist.revokeUserBefore(
       user.id,

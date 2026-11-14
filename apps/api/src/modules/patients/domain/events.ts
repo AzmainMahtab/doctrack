@@ -5,6 +5,7 @@ export class PatientRegistered extends DomainEvent<{
   doctorId: string;
   condition: Condition;
   admittedAt: string;
+  registeredOn: string;
 }> {
   readonly name = 'patient.registered';
 }
@@ -21,6 +22,10 @@ export class PatientConditionChanged extends DomainEvent<{
   readonly name = 'patient.condition_changed';
 }
 
-export class PatientRemoved extends DomainEvent<{ doctorId: string; condition: Condition }> {
+export class PatientRemoved extends DomainEvent<{
+  doctorId: string;
+  condition: Condition;
+  registeredOn: string;
+}> {
   readonly name = 'patient.removed';
 }

@@ -1,5 +1,8 @@
 import { createContainer } from './container.ts';
+import { createAnalyticsModule } from './modules/analytics/index.ts';
+import { createAuditModule } from './modules/audit/index.ts';
 import { createDoctorsModule } from './modules/doctors/index.ts';
+import { createPatientsModule } from './modules/patients/index.ts';
 import { ensureIndexes } from './platform/database/index.ts';
 import { createMetrics, startWorkerServer } from './platform/metrics/index.ts';
 import {
@@ -20,14 +23,30 @@ async function main(): Promise<void> {
   await ensureIndexes(mongo.db);
   await ensureStreams(nats.jsm, topology);
 
-  const doctors = createDoctorsModule({
+  const domain = {
     db: mongo.db,
     transactions: container.transactions,
     uow: container.uow,
     eventBus: container.eventBus,
     clock: container.clock,
+  };
+  const doctors = createDoctorsModule(domain);
+  const patients = createPatientsModule({ ...domain, doctors: doctors.api });
+  const analytics = createAnalyticsModule({
+    db: mongo.db,
+    redis: container.redis.client,
+    transactions: container.transactions,
+    uow: container.uow,
+    clock: container.clock,
+    doctors: doctors.api,
+    patients: patients.api,
   });
-  const handlers: DurableEventHandler[] = [...doctors.consumers];
+  const audit = createAuditModule({ db: mongo.db, transactions: container.transactions });
+  const handlers: DurableEventHandler[] = [
+    ...doctors.consumers,
+    ...analytics.consumers,
+    ...audit.consumers,
+  ];
 
   const relay = new OutboxRelay(mongo.db, container.publisher, topology, logger, {
     batchSize: config.outboxBatch,

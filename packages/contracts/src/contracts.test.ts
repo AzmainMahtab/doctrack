@@ -4,6 +4,8 @@ import {
   CreatePatientSchema,
   DoctorListQuerySchema,
   PatientListQuerySchema,
+  PatientsPerDoctorQuerySchema,
+  TimeseriesQuerySchema,
   UpdatePatientSchema,
 } from './index.ts';
 
@@ -114,5 +116,35 @@ describe('list queries', () => {
     expect(DoctorListQuerySchema.safeParse({ sort: '-patientCount' }).success).toBe(true);
     expect(PatientListQuerySchema.safeParse({ sort: '-patientCount' }).success).toBe(false);
     expect(PatientListQuerySchema.safeParse({ sort: '-admittedAt' }).success).toBe(true);
+  });
+});
+
+describe('TimeseriesQuerySchema', () => {
+  const parse = (value: Record<string, unknown>) => TimeseriesQuerySchema.safeParse(value);
+
+  it('defaults to patients per day and accepts the documented windows', () => {
+    expect(parse({}).data).toMatchObject({ entity: 'patients', interval: 'day' });
+    for (const window of ['7', '30', '90']) expect(parse({ window }).success).toBe(true);
+    expect(parse({ window: '15' }).success).toBe(false);
+  });
+
+  it('accepts a custom range of at most 366 days', () => {
+    expect(parse({ from: '2026-01-01', to: '2026-12-31' }).success).toBe(true);
+    expect(parse({ from: '2024-01-01', to: '2024-12-31' }).success).toBe(true);
+    expect(parse({ from: '2026-01-01', to: '2027-01-02' }).success).toBe(false);
+  });
+
+  it('rejects an inverted, half-open or doubly specified range', () => {
+    expect(parse({ from: '2026-02-01', to: '2026-01-01' }).success).toBe(false);
+    expect(parse({ from: '2026-01-01' }).success).toBe(false);
+    expect(parse({ from: '2026-01-01', to: '2026-01-31', window: '7' }).success).toBe(false);
+  });
+});
+
+describe('PatientsPerDoctorQuerySchema', () => {
+  it('defaults to 10 and caps at 20', () => {
+    expect(PatientsPerDoctorQuerySchema.parse({}).limit).toBe(10);
+    expect(PatientsPerDoctorQuerySchema.safeParse({ limit: '21' }).success).toBe(false);
+    expect(PatientsPerDoctorQuerySchema.safeParse({ limit: '0' }).success).toBe(false);
   });
 });

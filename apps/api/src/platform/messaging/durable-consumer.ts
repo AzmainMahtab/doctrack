@@ -20,6 +20,10 @@ export abstract class DurableEventHandler {
   abstract readonly consumerName: string;
   abstract readonly subjects: string[];
   abstract handle(event: EventEnvelope): Promise<void>;
+
+  afterCommit(_event: EventEnvelope): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 export interface ConsumerOptions {
@@ -135,6 +139,12 @@ export class ConsumerRunner {
       await this.deps.uow.withTransaction(async () => {
         await this.markProcessed(handler.consumerName, envelope.id);
         await handler.handle(envelope);
+      });
+      await handler.afterCommit(envelope).catch((hookError: unknown) => {
+        this.deps.logger.warn(
+          { err: hookError, consumer: handler.consumerName, eventId: envelope.id },
+          'afterCommit hook failed',
+        );
       });
       message.ack();
     } catch (error) {

@@ -7,3 +7,4 @@ export * from './auth/auth.ts';
 export * from './common/fields.ts';
 export * from './doctors/doctors.ts';
 export * from './patients/patients.ts';
+export * from './dashboard/dashboard.ts';

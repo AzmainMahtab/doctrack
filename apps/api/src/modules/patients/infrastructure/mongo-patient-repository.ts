@@ -5,7 +5,7 @@ import { Page, PaginationParams } from '../../../shared/pagination/index.ts';
 import { countMatching } from '../../../platform/database/index.ts';
 import { searchTokens, sortKey } from '../../../shared/text/index.ts';
 import { Patient, type PatientProps } from '../domain/patient.ts';
-import { PatientRepository, type PatientRow } from '../domain/ports.ts';
+import { PatientRepository, type DayCount, type PatientRow } from '../domain/ports.ts';
 import { buildPatientFilter, patientSort, type PatientFilterInput } from './patient-queries.ts';
 
 export const PATIENTS = 'patients';
@@ -71,6 +71,38 @@ export class MongoPatientRepository extends PatientRepository {
   async findById(id: string): Promise<Patient | null> {
     const doc = await this.patients.findOne({ _id: id }, sessionOptions(this.context));
     return doc ? new Patient(toProps(doc)) : null;
+  }
+
+  countAll(): Promise<number> {
+    return this.patients.countDocuments({}, sessionOptions(this.context));
+  }
+
+  async countByCondition(): Promise<Record<string, number>> {
+    const rows = await this.patients
+      .aggregate<{ _id: string; count: number }>(
+        [{ $group: { _id: '$condition', count: { $sum: 1 } } }],
+        sessionOptions(this.context),
+      )
+      .toArray();
+    return Object.fromEntries(rows.map((r) => [r._id, r.count]));
+  }
+
+  async registrationsByDay(): Promise<DayCount[]> {
+    const rows = await this.patients
+      .aggregate<{ _id: string; count: number }>(
+        [
+          {
+            $group: {
+              _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: 'UTC' } },
+              count: { $sum: 1 },
+            },
+          },
+          { $sort: { _id: 1 } },
+        ],
+        sessionOptions(this.context),
+      )
+      .toArray();
+    return rows.map((r) => ({ date: r._id, count: r.count }));
   }
 
   list(query: PatientListQuery): Promise<Page<PatientRow>> {

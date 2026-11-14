@@ -1,5 +1,9 @@
 import { DomainEvent } from '../../../shared/domain/index.ts';
 
-export class DoctorRegistered extends DomainEvent<{ specialization: string; hospital: string }> {
+export class DoctorRegistered extends DomainEvent<{
+  specialization: string;
+  hospital: string;
+  registeredOn: string;
+}> {
   readonly name = 'doctor.registered';
 }

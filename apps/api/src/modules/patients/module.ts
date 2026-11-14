@@ -7,6 +7,7 @@ import {
   GetPatientQuery,
   ListDoctorPatientsQuery,
   ListPatientsQuery,
+  PatientsPublicApi,
   RemovePatientHandler,
   UpdatePatientHandler,
 } from './application/index.ts';
@@ -27,6 +28,7 @@ export function createPatientsModule(deps: PatientsDeps) {
   const repository = new MongoPatientRepository(deps.db, deps.transactions);
   const directory = new DoctorDirectoryAdapter(deps.doctors);
   return {
+    api: new PatientsPublicApi(repository),
     routes: patientRoutes({
       admit: new AdmitPatientHandler(repository, directory, deps.uow, deps.eventBus, deps.clock),
       update: new UpdatePatientHandler(repository, deps.uow, deps.eventBus, deps.clock),

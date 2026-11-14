@@ -24,3 +24,9 @@
 - In an `explain()` assertion, serialise the whole winning plan and look for `COLLSCAN`; an index-only plan can still contain an in-memory `SORT`, which is acceptable at page scale.
 - The database sorts names by a normalised key, so a test that checks name order must normalise the same way (JavaScript sorts accented letters after `z`).
 - Doctors are immutable in v1. If doctors become editable, patients' `doctorName` copy must be refreshed by an event consumer.
+- A cache shared by several test databases leaks between them: the first dashboard test read another file's cached summary until the cache key was namespaced per database.
+- MongoDB in a container with the default 1,024 open-file limit stops accepting connections once enough databases and collections exist (every collection and index is a file). Raise `nofile`; the failure shows as `Too many open files` in the Mongo log and as server-selection timeouts in the client.
+- Integration files run one at a time (`fileParallelism: false`); running them in parallel against one single-node Mongo caused connection timeouts. `make test-integration TEST=<name>` runs one file.
+- A test asserting that events carry no personal data found the staff email in `user.logged_in`; assert on the serialised audit log, not on one payload.
+- An `afterCommit` hook must run after the consumer's transaction commits and before the ack, and its failure must not retry the message; otherwise the cache could be repopulated with data from before the commit.
+- A projection built from deltas cannot be rebuilt safely while events are in flight; the rebuild waits for idle and `--check` reports any double count.

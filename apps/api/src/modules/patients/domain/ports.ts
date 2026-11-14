@@ -7,11 +7,19 @@ export type PatientRow = Pick<
   'id' | 'name' | 'condition' | 'doctorId' | 'doctorName' | 'admittedAt'
 >;
 
+export interface DayCount {
+  date: string;
+  count: number;
+}
+
 export abstract class PatientRepository {
   abstract insert(patient: Patient): Promise<void>;
   abstract save(patient: Patient): Promise<void>;
   abstract delete(id: string): Promise<void>;
   abstract findById(id: string): Promise<Patient | null>;
+  abstract countAll(): Promise<number>;
+  abstract countByCondition(): Promise<Record<string, number>>;
+  abstract registrationsByDay(): Promise<DayCount[]>;
   abstract list(query: PatientListQuery): Promise<Page<PatientRow>>;
   abstract listForDoctor(
     doctorId: string,

@@ -2,6 +2,7 @@ import type { RequestHandler, Response } from 'express';
 import type { Authenticator, RateLimiter } from '../../shared/application/index.ts';
 import type { CurrentUser } from '../../shared/auth/index.ts';
 import { AppError } from '../../shared/errors/index.ts';
+import { requestContext } from '../logger/index.ts';
 import { recordDecision } from '../rate-limit/headers.ts';
 import { POLICIES, type PolicyName, type PolicyTable } from '../rate-limit/index.ts';
 import { ACCESS_COOKIE, readCookie } from './cookies.ts';
@@ -38,7 +39,9 @@ const authenticate =
     try {
       const token = readCookie(req, ACCESS_COOKIE);
       if (!token) throw AppError.unauthenticated();
-      res.locals.auth = await deps.authenticator.authenticate(token);
+      const user = await deps.authenticator.authenticate(token);
+      res.locals.auth = user;
+      requestContext.setActor(user.id);
       next();
     } catch (error) {
       next(error);

@@ -7,6 +7,7 @@ export const EventEnvelopeSchema = z.object({
   aggregateId: z.string().min(1),
   occurredAt: z.iso.datetime(),
   correlationId: z.string().nullable(),
+  actorId: z.string().nullable().default(null),
   payload: z.record(z.string(), z.unknown()),
 });
 

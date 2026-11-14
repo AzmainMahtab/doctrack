@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { createContainer } from './container.ts';
+import { createAnalyticsModule } from './modules/analytics/index.ts';
 import { createDoctorsModule } from './modules/doctors/index.ts';
 import { createIdentityModule } from './modules/identity/index.ts';
 import { createPatientsModule } from './modules/patients/index.ts';
@@ -41,11 +42,22 @@ async function main(): Promise<void> {
   const doctors = createDoctorsModule(domain);
   const patients = createPatientsModule({ ...domain, doctors: doctors.api });
 
+  const analytics = createAnalyticsModule({
+    db: container.mongo.db,
+    redis: container.redis.client,
+    transactions: container.transactions,
+    uow: container.uow,
+    clock: container.clock,
+    doctors: doctors.api,
+    patients: patients.api,
+  });
+
   const routes = [
     ...systemRoutes(container.probes, config.readyTimeoutMs),
     ...identity.routes,
     ...doctors.routes,
     ...patients.routes,
+    ...analytics.routes,
   ];
   const { app } = createApp({
     config,
