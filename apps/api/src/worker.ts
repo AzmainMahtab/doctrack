@@ -1,4 +1,5 @@
 import { createContainer } from './container.ts';
+import { createDoctorsModule } from './modules/doctors/index.ts';
 import { ensureIndexes } from './platform/database/index.ts';
 import { createMetrics, startWorkerServer } from './platform/metrics/index.ts';
 import {
@@ -19,7 +20,14 @@ async function main(): Promise<void> {
   await ensureIndexes(mongo.db);
   await ensureStreams(nats.jsm, topology);
 
-  const handlers: DurableEventHandler[] = [];
+  const doctors = createDoctorsModule({
+    db: mongo.db,
+    transactions: container.transactions,
+    uow: container.uow,
+    eventBus: container.eventBus,
+    clock: container.clock,
+  });
+  const handlers: DurableEventHandler[] = [...doctors.consumers];
 
   const relay = new OutboxRelay(mongo.db, container.publisher, topology, logger, {
     batchSize: config.outboxBatch,

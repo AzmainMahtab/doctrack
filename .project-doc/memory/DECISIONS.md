@@ -42,6 +42,12 @@
 | D-36 | 2026-11-14 | Each route declares its full path (`/api/v1/...`), `public`, `permission` and `rateLimit`; the middleware chain is built from the declaration | One declaration drives behaviour and OpenAPI |
 | D-37 | 2026-11-14 | Cookies: `dt_access` (path `/`) and `dt_refresh` (path `/api/v1/auth`), httpOnly, SameSite=Lax, `Secure` from `COOKIE_SECURE` (default on in production) | The refresh token is only sent to the auth routes |
 | D-38 | 2026-11-14 | Accounts are created by `make seed` (idempotent); demo passwords come from `SEED_*` variables | No self-registration (A-1) |
+| D-39 | 2026-11-14 | Search matches word prefixes: each document stores lowercase, accent-stripped `searchTokens` (name, specialization, hospital / name, diagnosis) in an indexed array, and each query word is an anchored regex | Search-as-you-type that uses an index and combines with filters and sorts; a text index only matches whole words |
+| D-40 | 2026-11-14 | Patients carry a copy of the doctor's name (`doctorName`), taken from the `DoctorDirectory` port when the patient is admitted | Doctors are immutable in v1, so the copy cannot go stale; list rows need no join. A future doctor edit must emit an event that updates it |
+| D-41 | 2026-11-14 | `doctor.patientCount` is maintained by the `doctors-patient-count` consumer, which applies `patient.registered` (+1) and `patient.removed` (-1) in the same transaction as its idempotency marker | Modules stay decoupled; the count converges within the relay poll interval |
+| D-42 | 2026-11-14 | `DoctorDirectory` is declared in the patients module and implemented by an adapter that imports the doctors module's `index.ts` | The consumer owns its port; the module boundary rule is respected |
+| D-43 | 2026-11-14 | An unfiltered list total uses `estimatedDocumentCount()`; filtered totals use `countDocuments(filter)` | A full count of an unfiltered collection is a collection scan; the metadata count is constant time |
+| D-44 | 2026-11-14 | Durable consumer names use hyphens, not dots (`doctors-patient-count`) | NATS rejects `.` in durable names |
 
 ## Open questions
 

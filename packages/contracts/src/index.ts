@@ -4,3 +4,6 @@ export * from './common/page.ts';
 export * from './system/health.ts';
 export * from './events/envelope.ts';
 export * from './auth/auth.ts';
+export * from './common/fields.ts';
+export * from './doctors/doctors.ts';
+export * from './patients/patients.ts';

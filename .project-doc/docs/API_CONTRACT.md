@@ -129,7 +129,7 @@ Redis is a hard dependency (blacklist and limiter). When it is down, login and e
 
 | Method | Path | Permission | Purpose |
 |--------|------|-----------|---------|
-| GET | `/doctors` | `doctors:read` | list. Query: `page`, `limit`, `q`, `specialization`, `hospital`, `from`, `to`, `sort` |
+| GET | `/doctors` | `doctors:read` | list. Query: `page`, `limit`, `q` (word prefixes), `specialization`, `hospital`, `from`, `to` (created date, inclusive), `sort` (`-createdAt` default, `createdAt`, `name`, `-name`, `-patientCount`) |
 | POST | `/doctors` | `doctors:write` | create |
 | GET | `/doctors/:id` | `doctors:read` | one doctor |
 | GET | `/doctors/:id/patients` | `patients:read` | that doctor's patients. Query: `page`, `limit`, `q`, `condition` |
