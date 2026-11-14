@@ -1,4 +1,4 @@
-.PHONY: help init up down dev dev-down logs ps migrate seed rebuild-analytics check test test-integration test-e2e build clean
+.PHONY: help init up down dev dev-down logs ps migrate seed deploy seed-scale explain-check load-check rebuild-analytics check test test-integration test-e2e build clean
 
 -include .env
 export
@@ -68,6 +68,19 @@ rebuild-analytics: ## Recompute the dashboard read model from the data (ARGS=--c
 
 check: ## Full quality gate: lint, format, typecheck, architecture, unit tests, build
 	pnpm check
+
+seed-scale: ## Load 10k doctors and 100k patients and rebuild the dashboard projection (RESET=1 replaces them)
+	$(COMPOSE) run --rm api node dist/seed-scale.js $(if $(RESET),--reset)
+	$(COMPOSE) run --rm worker node dist/rebuild-analytics.js
+
+explain-check: ## Run explain() on the hot list queries; fails on any COLLSCAN
+	$(COMPOSE) run --rm api node dist/explain-check.js
+
+load-check: ## p95 latency of the list and dashboard endpoints against the running stack (load .env first)
+	@set -a && . ./.env && set +a && node scripts/load-check.mjs
+
+deploy: ## Start the stack behind Caddy with TLS (set DOMAIN and COOKIE_SECURE=true in .env)
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 test: ## Unit tests
 	pnpm test

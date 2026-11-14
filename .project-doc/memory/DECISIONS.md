@@ -71,6 +71,9 @@
 | D-65 | 2026-11-14 | No chart library. Bars are elements built by a pure `buildBars`; dashboard is server-rendered with link-based controls | Matches the drawn design exactly, accessible, zero bundle. Supersedes the Recharts choice in D-13 |
 | D-66 | 2026-11-14 | `GET /doctors/facets` supplies filter values; the patients doctor filter is an async combobox over `GET /doctors?q=` | Selects need their options; a doctor list can be large |
 | D-67 | 2026-11-14 | Rate limits raised: `user-read` 120 to 300 per minute, `ip-global` 300 to 600 | One server-rendered page makes several reads; measured exhaustion by a single admin during normal use and test runs |
+| D-68 | 2026-11-14 | Scale data is loaded by `make seed-scale`, which bulk-inserts straight into MongoDB and then runs `rebuild-analytics`; it bypasses the outbox | 110,000 events through the relay would measure the relay, not the queries; the rebuild is the documented repair path (D-49) |
+| D-69 | 2026-11-14 | The app sends `noindex`; the Lighthouse SEO score is therefore 60 on every page (`is-crawlable`) and is not a target | A private admin tool should not be indexed; the PRD sets only an accessibility target |
+| D-70 | 2026-11-14 | Production runs behind Caddy (`docker-compose.prod.yml`): automatic TLS, HSTS, only ports 80 and 443 published, `/docs` and `/openapi.json` routed to the API, everything else to the web app | Caddy sets the client address on `X-Forwarded-For`, which D-61 depends on; HSTS needs HTTPS and so belongs at the edge |
 
 ## Open questions
 
