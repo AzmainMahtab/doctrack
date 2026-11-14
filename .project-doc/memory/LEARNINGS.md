@@ -19,3 +19,8 @@
 - `JWT` `typ` must be a claim we set and check, not only the header; a refresh token presented as an access token is rejected with "Wrong token type.".
 - The login limiter counts failures only: peek before verifying the password, record on failure, reset the account key on success. Counting every attempt would lock out a user who logs in repeatedly.
 - An empty `SEED_*` variable from `make` or compose must be treated as unset; the config schema converts empty strings to `undefined` before validating.
+- NATS durable consumer names cannot contain `.`; the failure only appeared when a consumer was actually created, so integration tests that start the real runner are what caught it.
+- `countDocuments({})` and `$match: {}` plus `$count` are collection scans; use `estimatedDocumentCount()` for an unfiltered total and keep an index behind every filtered one.
+- In an `explain()` assertion, serialise the whole winning plan and look for `COLLSCAN`; an index-only plan can still contain an in-memory `SORT`, which is acceptable at page scale.
+- The database sorts names by a normalised key, so a test that checks name order must normalise the same way (JavaScript sorts accented letters after `z`).
+- Doctors are immutable in v1. If doctors become editable, patients' `doctorName` copy must be refreshed by an event consumer.

@@ -4,18 +4,19 @@ Updated: 2026-11-14
 
 ## Phase
 
-P2 Identity complete on `feature/p2-identity` (not yet merged). Next: P3 Doctors and patients API.
+P3 Doctors and patients API complete on `feature/p3-doctors-patients` (not yet merged). Next: P4 Analytics and audit.
 
 ## Done
 
-- Records, PRD and phases (D-1..D-28); P0 Foundation and P1 Event backbone merged into `dev`
-- P2 Identity: `identity` module (users, Argon2id, ES256 tokens with `typ` check, login, refresh with rotation and reuse detection, logout, `me`, deactivation), Redis token blacklist with TTL equal to remaining token life, session revocation by `sid`, role-based permissions (`admin`, `viewer`), request pipeline (global IP limit, authentication, permission, route policy), Redis sliding-window rate limiter with the six named policies and IETF draft headers, cookie handling, `make seed`
-- P2 gate verified: 50 unit and 39 integration tests pass. On the running stack: login sets two httpOnly cookies, six bad logins give five 401s then a 429 with `Retry-After`, a logged-out access token returns `TOKEN_REVOKED`, and with Redis stopped login and `/auth/me` return 503 while `/health` stays 200
+- Records, PRD and phases (D-1..D-28); P0, P1 and P2 merged into `dev`
+- P3: `doctors` and `patients` modules (aggregates, handlers, queries, repositories, routes), contracts for every request and response, word-prefix search tokens, the indexes in `DATA_MODEL.md`, the `DoctorDirectory` port, the `doctors-patient-count` consumer (registered in the worker), nested patient routes, 10 new documented endpoints
+- P3 gate verified: 69 API unit tests, 13 contract tests, and 75 integration tests pass. `explain()` on 2,000 doctors and 20,000 patients shows no collection scan for any list shape. On the running stack: add two patients, `patientCount` reaches 2; delete one, it falls to 1; search, filters and 403 for the viewer behave as specified; the worker shows 0 pending and 0 dead letters
 
 ## Next
 
-- Merge the P2 PR into `dev`
-- P3 Doctors and patients API, on `feature/p3-doctors-patients` from `dev`: every route declares its permission, and the contract and `explain()` tests from PHASES.md apply
+- Merge the P3 PR into `dev`
+- P4 Analytics and audit, on `feature/p4-analytics-audit` from `dev`
+- P7 reruns the `explain()` checks at 10,000 doctors and 100,000 patients with the seed script
 
 ## Blockers
 

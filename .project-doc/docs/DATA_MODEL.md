@@ -30,50 +30,59 @@ Indexes: `{ userId: 1 }`, `{ familyId: 1 }`, `{ expiresAt: 1 }` TTL.
 ## doctors
 
 | Field | Type | Notes |
-|-------|------|-------|
+| --- | --- | --- |
 | _id | uuid | |
-| name | string | |
+| name | string | trimmed |
+| nameLower | string | accent-stripped, lowercase; name sort key |
 | specialization | string | |
 | hospital | string | |
-| phone | string | |
-| email | string | unique |
-| patientCount | number | projection maintained by a consumer |
+| phone | string | E.164 |
+| email | string | unique, stored lowercase |
+| patientCount | number | maintained by the `doctors-patient-count` consumer |
+| isActive | boolean | always true in v1 (D-19) |
+| searchTokens | string[] | lowercase words of name, specialization, hospital (max 32) |
 | createdAt, updatedAt | Date | |
 
 Indexes:
 
 - `{ email: 1 }` unique
 - `{ createdAt: -1, _id: -1 }` default sort and date filter
-- `{ specialization: 1, createdAt: -1 }`
-- `{ hospital: 1, createdAt: -1 }`
-- `{ patientCount: -1 }` patients-per-doctor ranking
-- text index on `name`, `specialization`, `hospital`
+- `{ specialization: 1, createdAt: -1, _id: -1 }`
+- `{ hospital: 1, createdAt: -1, _id: -1 }`
+- `{ patientCount: -1, _id: -1 }` patients-per-doctor ranking
+- `{ nameLower: 1, _id: 1 }` name sort
+- `{ searchTokens: 1 }` word-prefix search (multikey)
 
-## patients
+## patients (A-2, A-3)
 
 | Field | Type | Notes |
-|-------|------|-------|
+| --- | --- | --- |
 | _id | uuid | |
 | doctorId | uuid | |
-| name | string | |
-| dateOfBirth | Date | |
+| doctorName | string | copy taken when the patient is admitted (D-40) |
+| name | string | trimmed |
+| nameLower | string | name sort key |
+| dateOfBirth | Date | UTC midnight |
 | gender | `female` \| `male` \| `other` | |
-| phone | string | |
-| email | string | |
+| phone | string | E.164 |
+| email | string | lowercase |
 | condition | `stable` \| `under_observation` \| `critical` \| `recovered` | |
-| diagnosis | string | |
+| diagnosis | string | up to 500 characters |
 | admittedAt | Date | |
+| searchTokens | string[] | lowercase words of name and diagnosis (max 32) |
 | createdAt, updatedAt | Date | |
 
 Indexes:
 
 - `{ doctorId: 1, createdAt: -1, _id: -1 }` a doctor's patient list
-- `{ condition: 1, createdAt: -1 }`
+- `{ doctorId: 1, condition: 1, createdAt: -1, _id: -1 }`
+- `{ condition: 1, createdAt: -1, _id: -1 }`
 - `{ createdAt: -1, _id: -1 }`
-- `{ admittedAt: -1 }`
-- text index on `name`, `diagnosis`
+- `{ admittedAt: -1, _id: -1 }`
+- `{ nameLower: 1, _id: 1 }`
+- `{ searchTokens: 1 }`
 
-No cross-collection foreign keys are enforced by the database; the `doctors` module's `DoctorDirectory` port checks existence at write time.
+No cross-collection foreign keys are enforced by the database; the patients module's `DoctorDirectory` port checks the doctor at write time.
 
 ## outbox
 
@@ -119,7 +128,7 @@ Append-only: `{ _id, eventType, aggregateId, actorId, correlationId, occurredAt,
 
 ## Query rules
 
-- Lists use page + limit (capped at 100) with `total` from a count over the same filter; projection on every list.
+- Lists use page + limit (capped at 100). `total` is `countDocuments(filter)`, or `estimatedDocumentCount()` when there is no filter (D-43). Every list uses a projection.
 - Dashboard reads `analytics_*`, never `patients` or `doctors` in bulk.
 - Every hot query is checked with `explain("executionStats")` in an integration test that fails on `COLLSCAN`.
 - All writes that emit events use a session transaction that includes the outbox insert.

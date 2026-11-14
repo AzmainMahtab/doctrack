@@ -1,6 +1,8 @@
 import { generateKeyPairSync } from 'node:crypto';
 import { z } from '@doctrack/contracts';
+import { createDoctorsModule } from '../../modules/doctors/index.ts';
 import { createIdentityModule } from '../../modules/identity/index.ts';
+import { createPatientsModule } from '../../modules/patients/index.ts';
 import { connectRedis, type RedisHandle } from '../cache/index.ts';
 import { SystemClock } from '../clock.ts';
 import { createApp, defineRoute, systemRoutes } from '../http/index.ts';
@@ -59,9 +61,21 @@ export async function createIdentityApp(h: Harness, options: IdentityAppOptions 
     }),
   ];
 
+  const domain = {
+    db: h.mongo.db,
+    transactions: h.transactions,
+    uow: h.uow,
+    eventBus: h.bus,
+    clock: new SystemClock(),
+  };
+  const doctors = createDoctorsModule(domain);
+  const patients = createPatientsModule({ ...domain, doctors: doctors.api });
+
   const routes = [
     ...systemRoutes([h.mongo.probe, redis.probe], 500),
     ...identity.routes,
+    ...doctors.routes,
+    ...patients.routes,
     ...fixtures,
   ];
   const built = createApp({
@@ -74,7 +88,7 @@ export async function createIdentityApp(h: Harness, options: IdentityAppOptions 
     limiter,
     policies: { ...defaultPolicies, ...options.policies },
   });
-  return { ...built, identity, redis, routes };
+  return { ...built, identity, doctors, patients, redis, routes };
 }
 
 export async function connectOwnRedis(h: Harness): Promise<RedisHandle> {

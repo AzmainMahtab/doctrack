@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { createContainer } from './container.ts';
+import { createDoctorsModule } from './modules/doctors/index.ts';
 import { createIdentityModule } from './modules/identity/index.ts';
+import { createPatientsModule } from './modules/patients/index.ts';
 import { createApp, systemRoutes } from './platform/http/index.ts';
 import { installShutdown } from './platform/lifecycle.ts';
 import { RedisRateLimiter } from './platform/rate-limit/index.ts';
@@ -29,7 +31,22 @@ async function main(): Promise<void> {
     },
   });
 
-  const routes = [...systemRoutes(container.probes, config.readyTimeoutMs), ...identity.routes];
+  const domain = {
+    db: container.mongo.db,
+    transactions: container.transactions,
+    uow: container.uow,
+    eventBus: container.eventBus,
+    clock: container.clock,
+  };
+  const doctors = createDoctorsModule(domain);
+  const patients = createPatientsModule({ ...domain, doctors: doctors.api });
+
+  const routes = [
+    ...systemRoutes(container.probes, config.readyTimeoutMs),
+    ...identity.routes,
+    ...doctors.routes,
+    ...patients.routes,
+  ];
   const { app } = createApp({
     config,
     logger,
