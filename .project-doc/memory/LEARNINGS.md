@@ -15,3 +15,7 @@
 - Durable consumers created with `deliver_policy: all` replay old events, so integration tests give each consumer its own event area (`<name>.>`) instead of sharing one subject.
 - A crashed relay leaves rows `claimed` until the lease expires (30 s by default); recovery is automatic, and rows already published are deduplicated by `Nats-Msg-Id`, so the stream holds one message per event.
 - `MongoUnitOfWork` uses `session.withTransaction`, which may re-run the callback on a transient error, so work inside a transaction must be safe to repeat.
+- Express `trust proxy` = 1 uses the rightmost `X-Forwarded-For` entry as the client IP, so leading entries a client forges are ignored. A client that talks to the API directly with a single forged entry would still be trusted, so the API must only be reachable through the proxy.
+- `JWT` `typ` must be a claim we set and check, not only the header; a refresh token presented as an access token is rejected with "Wrong token type.".
+- The login limiter counts failures only: peek before verifying the password, record on failure, reset the account key on success. Counting every attempt would lock out a user who logs in repeatedly.
+- An empty `SEED_*` variable from `make` or compose must be treated as unset; the config schema converts empty strings to `undefined` before validating.

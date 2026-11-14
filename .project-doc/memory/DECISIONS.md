@@ -36,6 +36,12 @@
 | D-30 | 2026-11-14 | Dead letters go to a separate `DEAD_LETTERS` stream (`dlq.<consumer>`) published by the consumer runner at `max_deliver`, then the source message is terminated | The server only stops redelivering at `max_deliver`; it never moves the message. A separate stream has its own retention and depth metric |
 | D-31 | 2026-11-14 | The worker serves `/health`, `/ready` and `/metrics` on `WORKER_PORT` (9090), internal network only | The worker has no other HTTP surface; compose and a scraper need one |
 | D-32 | 2026-11-14 | A new durable consumer replays the whole stream (`deliver_policy: all`) | Projections can be rebuilt from history; handlers are idempotent |
+| D-33 | 2026-11-14 | Sessions are revoked by session id: refresh-token reuse or logout-of-session writes `sid:<sessionId>` in Redis, and every token of that session is rejected; individual tokens are blacklisted by `bl:<jti>` | One key revokes a whole token family without enumerating access tokens |
+| D-34 | 2026-11-14 | Deactivating a user stores `user:<id>:revoked-before` (a timestamp); tokens issued at or before it are rejected | Covers tokens whose ids were never recorded |
+| D-35 | 2026-11-14 | The role is carried in the access token and mapped to permissions in code (`ROLE_PERMISSIONS`); the pipeline order is global IP limit, authentication, permission, route policy, handler | Deny by default; no database lookup per request |
+| D-36 | 2026-11-14 | Each route declares its full path (`/api/v1/...`), `public`, `permission` and `rateLimit`; the middleware chain is built from the declaration | One declaration drives behaviour and OpenAPI |
+| D-37 | 2026-11-14 | Cookies: `dt_access` (path `/`) and `dt_refresh` (path `/api/v1/auth`), httpOnly, SameSite=Lax, `Secure` from `COOKIE_SECURE` (default on in production) | The refresh token is only sent to the auth routes |
+| D-38 | 2026-11-14 | Accounts are created by `make seed` (idempotent); demo passwords come from `SEED_*` variables | No self-registration (A-1) |
 
 ## Open questions
 

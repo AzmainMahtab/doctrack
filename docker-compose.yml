@@ -10,6 +10,14 @@ x-api-env: &api-env
   NATS_URL: nats://nats:4222
   NATS_USER: ${NATS_USER}
   NATS_PASSWORD: ${NATS_PASSWORD}
+  COOKIE_SECURE: ${COOKIE_SECURE:-false}
+  ACCESS_TOKEN_TTL_S: ${ACCESS_TOKEN_TTL_S:-900}
+  REFRESH_TOKEN_TTL_S: ${REFRESH_TOKEN_TTL_S:-604800}
+  SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@doctrack.dev}
+  SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+  SEED_VIEWER_EMAIL: ${SEED_VIEWER_EMAIL:-viewer@doctrack.dev}
+  SEED_VIEWER_PASSWORD: ${SEED_VIEWER_PASSWORD:-}
+  JWT_PRIVATE_KEY_PATH: /run/secrets/jwt-key
 
 services:
   mongo:
@@ -80,6 +88,8 @@ services:
     environment:
       <<: *api-env
       PORT: 8080
+    secrets:
+      - jwt-key
     ports:
       - '127.0.0.1:${API_HOST_PORT:-8080}:8080'
     depends_on:
@@ -138,6 +148,8 @@ services:
 secrets:
   mongo-keyfile:
     file: ./secrets/mongo-keyfile
+  jwt-key:
+    file: ./secrets/jwt_es256.pem
 
 volumes:
   mongo-data:

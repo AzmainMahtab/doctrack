@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import type { AppConfig } from '../config/index.ts';
+import { connectRedis, type RedisHandle } from '../cache/index.ts';
 import { loadConfig } from '../config/index.ts';
 import {
   connectMongo,
@@ -17,7 +18,7 @@ import {
   type Topology,
 } from '../messaging/index.ts';
 import { OutboxEventBus } from '../outbox/index.ts';
-import '../messaging/processed-events.ts';
+import '../../register-indexes.ts';
 import { DomainEvent } from '../../shared/domain/index.ts';
 
 export class ThingHappened extends DomainEvent {
@@ -29,6 +30,7 @@ export interface Harness {
   logger: Logger;
   mongo: MongoHandle;
   nats: NatsHandle;
+  redis: RedisHandle;
   topology: Topology;
   transactions: TransactionContext;
   uow: MongoUnitOfWork;
@@ -47,6 +49,7 @@ export async function createHarness(): Promise<Harness> {
   const logger = createLogger(config);
   const mongo = await connectMongo(config);
   const nats = await connectNats(config, `doctrack-int-${suffix}`);
+  const redis = await connectRedis(config, logger);
   const topology: Topology = {
     eventsStream: `EVT_${suffix}`,
     dlqStream: `DLQ_${suffix}`,
@@ -61,6 +64,7 @@ export async function createHarness(): Promise<Harness> {
     logger,
     mongo,
     nats,
+    redis,
     topology,
     transactions,
     uow: new MongoUnitOfWork(mongo.client, transactions),
@@ -71,6 +75,7 @@ export async function createHarness(): Promise<Harness> {
       await nats.jsm.streams.delete(topology.dlqStream).catch(() => undefined);
       await mongo.db.dropDatabase().catch(() => undefined);
       await nats.close();
+      await redis.close();
       await mongo.close();
     },
   };

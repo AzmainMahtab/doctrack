@@ -4,6 +4,7 @@ import { defineRoute, type RouteDefinition } from './define-route.ts';
 import { systemRoutes } from './system.routes.ts';
 import type { Probe } from '../health/index.ts';
 import { z } from '@doctrack/contracts';
+import { AllowAllLimiter, FakeAuthenticator } from '../testing/fakes.ts';
 
 export const upProbe = (name: string): Probe => ({ name, check: async () => undefined });
 export const downProbe = (name: string): Probe => ({
@@ -60,7 +61,15 @@ export function buildTestApp(
   const routes = [...systemRoutes(probes, 500), ...extra];
   const logger = createLogger({ env: 'test', logLevel: 'silent' });
   return {
-    ...createApp({ config: { trustProxyHops: 1 }, logger, routes, version: 'test' }),
+    ...createApp({
+      config: { trustProxyHops: 1 },
+      logger,
+      routes,
+      version: 'test',
+      cookies: { secure: false },
+      authenticator: new FakeAuthenticator(),
+      limiter: new AllowAllLimiter(),
+    }),
     routes,
   };
 }

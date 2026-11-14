@@ -5,6 +5,8 @@ import { loadConfig } from '../config/index.ts';
 import { connectMongo, type MongoHandle } from '../database/index.ts';
 import { createLogger } from '../logger/index.ts';
 import { connectNats, type NatsHandle } from '../messaging/index.ts';
+import { RedisRateLimiter } from '../rate-limit/index.ts';
+import { FakeAuthenticator } from '../testing/fakes.ts';
 import { createApp } from './app.ts';
 import { systemRoutes } from './system.routes.ts';
 
@@ -21,7 +23,15 @@ describe('readiness against real services', () => {
     redis = await connectRedis(config, logger);
     nats = await connectNats(config, 'doctrack-int-test');
     const routes = systemRoutes([mongo.probe, redis.probe, nats.probe], config.readyTimeoutMs);
-    app = createApp({ config, logger, routes, version: 'test' }).app;
+    app = createApp({
+      config,
+      logger,
+      routes,
+      version: 'test',
+      cookies: { secure: false },
+      authenticator: new FakeAuthenticator(),
+      limiter: new RedisRateLimiter(redis.client),
+    }).app;
   });
 
   afterAll(async () => {

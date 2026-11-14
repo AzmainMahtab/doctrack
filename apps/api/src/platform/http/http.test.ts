@@ -109,7 +109,10 @@ describe('problem details', () => {
 describe('validation', () => {
   it('returns 422 with an errors array of field and message', async () => {
     const { app } = buildTestApp();
-    const res = await request(app).post('/things/not-a-uuid').send({ name: 'a', email: 'nope' });
+    const res = await request(app)
+      .post('/things/not-a-uuid')
+      .set('Cookie', 'dt_access=test')
+      .send({ name: 'a', email: 'nope' });
     expect(res.status).toBe(422);
     expect(res.body.code).toBe('VALIDATION_FAILED');
     const fields = (res.body.errors as { field: string; message: string }[])
@@ -124,6 +127,7 @@ describe('validation', () => {
     const { app } = buildTestApp();
     const res = await request(app)
       .post(`/things/${UUID}`)
+      .set('Cookie', 'dt_access=test')
       .send({ name: 'Ada', email: 'ada@example.com' });
     expect(res.status).toBe(201);
     expect(res.body.data.n).toBe(1);
@@ -135,6 +139,7 @@ describe('response envelope', () => {
     const { app } = buildTestApp();
     const res = await request(app)
       .post(`/things/${UUID}?n=3`)
+      .set('Cookie', 'dt_access=test')
       .send({ name: 'Ada', email: 'ada@example.com' });
     expect(res.status).toBe(201);
     expect(res.body).toEqual({ data: { id: UUID, n: 3, name: 'Ada' }, meta: { total: 1 } });
@@ -142,7 +147,7 @@ describe('response envelope', () => {
 
   it('sends no body for 204', async () => {
     const { app } = buildTestApp();
-    const res = await request(app).delete('/things/abc');
+    const res = await request(app).delete('/things/abc').set('Cookie', 'dt_access=test');
     expect(res.status).toBe(204);
     expect(res.text).toBe('');
   });

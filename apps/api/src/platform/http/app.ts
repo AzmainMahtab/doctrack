@@ -5,11 +5,15 @@ import type { AppConfig } from '../config/index.ts';
 import type { Logger } from '../logger/index.ts';
 import { errorHandler, notFoundHandler } from './error-handler.ts';
 import { mountRoutes, type RouteDefinition } from './define-route.ts';
+import type { CookieSettings } from './cookies.ts';
+import { API_PREFIX } from './cookies.ts';
+import { buildChain, ipGlobalLimit, type PipelineDeps } from './pipeline.ts';
 import { buildOpenApiDocument } from './openapi.ts';
 import { requestId } from './request-id.ts';
 
-export interface AppOptions {
+export interface AppOptions extends PipelineDeps {
   config: Pick<AppConfig, 'trustProxyHops'>;
+  cookies: CookieSettings;
   logger: Logger;
   routes: readonly RouteDefinition[];
   version: string;
@@ -22,11 +26,12 @@ export interface BuiltApp {
 }
 
 export function createApp(options: AppOptions): BuiltApp {
-  const { config, logger, routes, version } = options;
+  const { config, logger, routes, version, cookies } = options;
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', config.trustProxyHops);
   app.set('etag', false);
+  app.locals.cookieSettings = cookies;
 
   app.use(requestId());
 
@@ -60,8 +65,10 @@ export function createApp(options: AppOptions): BuiltApp {
   });
   app.use(express.json({ limit: '100kb' }));
 
+  app.use(API_PREFIX, ipGlobalLimit(options));
+
   const router = Router();
-  mountRoutes(router, routes);
+  mountRoutes(router, routes, buildChain(options));
   app.use(router);
 
   app.use(notFoundHandler);

@@ -8,6 +8,7 @@ import {
   type DurableEventHandler,
 } from './platform/messaging/index.ts';
 import { installShutdown } from './platform/lifecycle.ts';
+import './register-indexes.ts';
 import { OutboxRelay } from './platform/outbox/index.ts';
 
 async function main(): Promise<void> {

@@ -34,6 +34,11 @@ export class MongoUnitOfWork extends UnitOfWork {
   }
 }
 
+export const sessionOptions = (context: TransactionContext): { session?: ClientSession } => {
+  const session = context.current();
+  return session ? { session } : {};
+};
+
 export abstract class MongoRepository {
   constructor(
     protected readonly db: Db,

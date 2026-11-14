@@ -1,4 +1,4 @@
-.PHONY: help init up down dev dev-down logs ps migrate check test test-integration build clean
+.PHONY: help init up down dev dev-down logs ps migrate seed check test test-integration build clean
 
 -include .env
 export
@@ -9,7 +9,10 @@ INFRA = mongo redis nats
 
 HOST_ENV = NODE_ENV=development PORT=8080 \
 	MONGO_URI="mongodb://$(MONGO_ROOT_USER):$(MONGO_ROOT_PASSWORD)@localhost:27017/?authSource=admin&directConnection=true" \
-	MONGO_DB=$(MONGO_DB) REDIS_URL="redis://:$(REDIS_PASSWORD)@localhost:6379" \
+	MONGO_DB=$(MONGO_DB) JWT_PRIVATE_KEY_PATH=$(CURDIR)/secrets/jwt_es256.pem COOKIE_SECURE=false \
+	SEED_ADMIN_EMAIL=$(SEED_ADMIN_EMAIL) SEED_ADMIN_PASSWORD=$(SEED_ADMIN_PASSWORD) \
+	SEED_VIEWER_EMAIL=$(SEED_VIEWER_EMAIL) SEED_VIEWER_PASSWORD=$(SEED_VIEWER_PASSWORD) \
+	REDIS_URL="redis://:$(REDIS_PASSWORD)@localhost:6379" \
 	NATS_URL=nats://localhost:4222 NATS_USER=$(NATS_USER) NATS_PASSWORD=$(NATS_PASSWORD)
 
 help: ## Show this help menu
@@ -26,6 +29,7 @@ init: ## First-time setup: .env with random secrets, Mongo keyfile, dependencies
 	fi
 	@mkdir -p secrets
 	@test -f secrets/mongo-keyfile || (openssl rand -base64 756 > secrets/mongo-keyfile && chmod 444 secrets/mongo-keyfile && echo "secrets/mongo-keyfile created")
+	@test -f secrets/jwt_es256.pem || (openssl ecparam -name prime256v1 -genkey -noout -out secrets/jwt_es256.pem && chmod 644 secrets/jwt_es256.pem && echo "secrets/jwt_es256.pem created")
 	pnpm install --frozen-lockfile
 
 up: ## Build and start the full stack
@@ -55,6 +59,9 @@ ps: ## Show service status
 migrate: ## Ensure MongoDB indexes
 	$(COMPOSE_DEV) up -d --wait $(INFRA)
 	@$(HOST_ENV) pnpm --filter @doctrack/api migrate
+
+seed: ## Create the demo admin and viewer accounts (stack must be up)
+	$(COMPOSE) run --rm api node dist/seed.js
 
 check: ## Full quality gate: lint, format, typecheck, architecture, unit tests, build
 	pnpm check
