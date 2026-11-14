@@ -91,32 +91,32 @@ Success is measured on a seeded dataset of 10,000 doctors and 100,000 patients: 
 - **Behaviour:** the form posts to `POST /auth/login`. On success the API sets an access cookie and a refresh cookie (httpOnly, Secure, SameSite=Lax) and the app opens the dashboard. On failure the form shows one message and keeps the email.
 - **Rules:** password 12–128 characters; Argon2id hash; access token 15 minutes; refresh token 7 days; a failed login returns the same body whether or not the email exists.
 - **Acceptance criteria:**
-  - [ ] Given valid credentials, when I submit, then I land on `/dashboard` and no token is readable from JavaScript.
-  - [ ] Given a wrong password, when I submit, then I see "Invalid email or password", the response is `401 UNAUTHENTICATED` and the body is identical to the one for an unknown email.
-  - [ ] Given 5 failed attempts for the same IP and email within 15 minutes, when I try a 6th, then I get `429 RATE_LIMITED` with `Retry-After`; a successful login resets the count.
+  - [x] Given valid credentials, when I submit, then I land on `/dashboard` and no token is readable from JavaScript.
+  - [x] Given a wrong password, when I submit, then I see "Invalid email or password", the response is `401 UNAUTHENTICATED` and the body is identical to the one for an unknown email.
+  - [x] Given 5 failed attempts for the same IP and email within 15 minutes, when I try a 6th, then I get `429 RATE_LIMITED` with `Retry-After`; a successful login resets the count.
 
 **FR-AUTH-2: Stay signed in**
 - **As a** user **I need** my session to continue without re-entering my password **so that** work is not interrupted.
 - **Behaviour:** when the access token has expired the app calls `POST /auth/refresh`; the refresh token is rotated on every use.
 - **Rules:** a rotated refresh token that is presented again revokes the entire token family.
 - **Acceptance criteria:**
-  - [ ] Given an expired access token and a valid refresh token, when I load a page, then the request succeeds after one transparent refresh.
-  - [ ] Given a refresh token that was already rotated, when it is presented, then the API returns `401 TOKEN_REVOKED` and every token of that family is rejected afterwards.
+  - [x] Given an expired access token and a valid refresh token, when I load a page, then the request succeeds after one transparent refresh.
+  - [x] Given a refresh token that was already rotated, when it is presented, then the API returns `401 TOKEN_REVOKED` and every token of that family is rejected afterwards.
 
 **FR-AUTH-3: Log out**
 - **As a** user **I need to** end my session **so that** a stolen cookie is useless.
 - **Behaviour:** `POST /auth/logout` blacklists the `jti` of the access and refresh tokens in Redis with a TTL equal to each token's remaining life, clears the cookies and returns `204`.
 - **Acceptance criteria:**
-  - [ ] Given I logged out, when I replay my old access token, then the API returns `401 TOKEN_REVOKED` until the token's original expiry.
-  - [ ] Given the blacklist entry's TTL elapsed, when I query Redis, then the key no longer exists.
-  - [ ] Given Redis is unreachable, when I call any authenticated route, then I get `503 UNAVAILABLE` with `Retry-After`.
+  - [x] Given I logged out, when I replay my old access token, then the API returns `401 TOKEN_REVOKED` until the token's original expiry.
+  - [x] Given the blacklist entry's TTL elapsed, when I query Redis, then the key no longer exists.
+  - [x] Given Redis is unreachable, when I call any authenticated route, then I get `503 UNAVAILABLE` with `Retry-After`.
 
 **FR-AUTH-4: Protected routes and permissions**
 - **As the** system **I need to** deny every request that lacks authentication or permission **so that** data stays private.
 - **Rules:** Admin holds `doctors:read|write`, `patients:read|write`, `dashboard:read`. Viewer holds the three `read` permissions. Every API route declares one permission. Pages are also gated by Next.js middleware.
 - **Acceptance criteria:**
-  - [ ] Given no cookie, when I request any page except `/login`, then I am redirected to `/login`; and any `/api/v1` route except `/auth/login` and `/health` returns `401`.
-  - [ ] Given a Viewer, when they call `POST /doctors`, then the API returns `403 FORBIDDEN` and the UI shows no write controls.
+  - [x] Given no cookie, when I request any page except `/login`, then I am redirected to `/login`; and any `/api/v1` route except `/auth/login` and `/health` returns `401`.
+  - [x] Given a Viewer, when they call `POST /doctors`, then the API returns `403 FORBIDDEN` and the UI shows no write controls.
 
 ### Doctors
 
@@ -125,40 +125,40 @@ Success is measured on a seeded dataset of 10,000 doctors and 100,000 patients: 
 - **Rules:** `name` 2–100 characters; `specialization` 2–80; `hospital` 2–120; `phone` in E.164 format; `email` valid and unique (case-insensitive).
 - **Behaviour:** `POST /doctors` returns `201` with the doctor; a `doctor.registered` event is written to the outbox in the same transaction.
 - **Acceptance criteria:**
-  - [ ] Given valid fields, when I submit, then the doctor appears at the top of the list and the dashboard doctor total increases by 1 within 2 seconds.
-  - [ ] Given an email that already exists, when I submit, then the API returns `409 CONFLICT` and the form marks the email field.
-  - [ ] Given an invalid phone, when I submit, then the API returns `422 VALIDATION_FAILED` with `errors[].field = "phone"`.
+  - [x] Given valid fields, when I submit, then the doctor appears at the top of the list and the dashboard doctor total increases by 1 within 2 seconds.
+  - [x] Given an email that already exists, when I submit, then the API returns `409 CONFLICT` and the form marks the email field.
+  - [x] Given an invalid phone, when I submit, then the API returns `422 VALIDATION_FAILED` with `errors[].field = "phone"`.
 
 **FR-DOC-2: List, search, filter and paginate doctors**
 - **As a** user **I need to** find doctors quickly **so that** I can open the right record.
 - **Rules:** `limit` default 20, maximum 100; search `q` matches name, specialization and hospital, debounced 300 ms in the UI; filters `specialization`, `hospital`, `from`/`to` on `createdAt`; sort by `createdAt` (default, descending), `name` or `patientCount`; the state of search, filters, sort and page is in the URL.
 - **Behaviour:** the response is `{ data, meta: { page, limit, total, totalPages } }`, and each row carries `id`, `name`, `specialization`, `hospital`, `patientCount`, `createdAt` only.
 - **Acceptance criteria:**
-  - [ ] Given 10,000 doctors, when I search, filter and page, then p95 latency is under 300 ms and `explain()` shows an index scan.
-  - [ ] Given a filter that matches nothing, when the list loads, then the page shows an empty state with a "Clear filters" action and `meta.total` is 0.
-  - [ ] Given I copy the URL of a filtered page, when another user with access opens it, then they see the same filters applied.
+  - [x] Given 10,000 doctors, when I search, filter and page, then p95 latency is under 300 ms and `explain()` shows an index scan.
+  - [x] Given a filter that matches nothing, when the list loads, then the page shows an empty state with a "Clear filters" action and `meta.total` is 0.
+  - [x] Given I copy the URL of a filtered page, when another user with access opens it, then they see the same filters applied.
 
 **FR-DOC-3: View a doctor and their patients**
 - **As a** user **I need to** open a doctor **so that** I see their details and patients.
 - **Behaviour:** `/doctors/:id` shows the doctor's fields and a paginated patient list (`GET /doctors/:id/patients`) with search and a condition filter.
 - **Acceptance criteria:**
-  - [ ] Given a doctor with 45 patients, when I open the page, then I see 20 rows, `total` 45 and 3 pages.
-  - [ ] Given an id that does not exist, when I open the page, then I see a not-found state and the API returned `404 NOT_FOUND`.
+  - [x] Given a doctor with 45 patients, when I open the page, then I see 20 rows, `total` 45 and 3 pages.
+  - [x] Given an id that does not exist, when I open the page, then I see a not-found state and the API returned `404 NOT_FOUND`.
 
 **FR-DOC-4: Add a patient under a doctor**
 - **As an** Admin **I need to** add a patient from the doctor's page **so that** the patient is assigned immediately.
 - **Behaviour:** `POST /doctors/:id/patients` with the patient fields from FR-PAT; `patients` checks the doctor exists through the `DoctorDirectory` port.
 - **Acceptance criteria:**
-  - [ ] Given a valid patient, when I submit, then the row appears in the list and the doctor's `patientCount` becomes the new count within 2 seconds.
-  - [ ] Given a doctor id that does not exist, when I submit, then the API returns `404 NOT_FOUND` and nothing is written.
+  - [x] Given a valid patient, when I submit, then the row appears in the list and the doctor's `patientCount` becomes the new count within 2 seconds.
+  - [x] Given a doctor id that does not exist, when I submit, then the API returns `404 NOT_FOUND` and nothing is written.
 
 **FR-DOC-5: Remove a patient from a doctor's list**
 - **As an** Admin **I need to** remove a patient **so that** the list stays correct.
 - **Behaviour:** `DELETE /doctors/:id/patients/:patientId` returns `204`. The UI removes the row immediately and restores it with an error toast if the call fails.
 - **Acceptance criteria:**
-  - [ ] Given a patient under the doctor, when I confirm deletion, then the row disappears, the API returns `204`, and `patientCount` decreases by 1 within 2 seconds.
-  - [ ] Given the patient belongs to a different doctor, when the call is made, then the API returns `404 NOT_FOUND` and nothing is deleted.
-  - [ ] Given the network fails, when I confirm deletion, then the row returns and an error toast appears.
+  - [x] Given a patient under the doctor, when I confirm deletion, then the row disappears, the API returns `204`, and `patientCount` decreases by 1 within 2 seconds.
+  - [x] Given the patient belongs to a different doctor, when the call is made, then the API returns `404 NOT_FOUND` and nothing is deleted.
+  - [x] Given the network fails, when I confirm deletion, then the row returns and an error toast appears.
 
 ### Patients
 
@@ -169,68 +169,68 @@ Success is measured on a seeded dataset of 10,000 doctors and 100,000 patients: 
 - **As a** user **I need to** search all patients **so that** I can find one without knowing their doctor.
 - **Rules:** same pagination and URL-state rules as FR-DOC-2; search `q` matches name and diagnosis; filters `condition`, `doctorId`, `from`/`to` on `createdAt`; each row carries `id`, `name`, `condition`, `doctorId`, doctor name, `admittedAt`.
 - **Acceptance criteria:**
-  - [ ] Given 100,000 patients, when I search, filter by condition and page, then p95 latency is under 300 ms and `explain()` shows no `COLLSCAN`.
-  - [ ] Given I filter by condition `critical` and doctor X, when the list loads, then every row matches both and `meta.total` equals that count.
+  - [x] Given 100,000 patients, when I search, filter by condition and page, then p95 latency is under 300 ms and `explain()` shows no `COLLSCAN`.
+  - [x] Given I filter by condition `critical` and doctor X, when the list loads, then every row matches both and `meta.total` equals that count.
 
 **FR-PAT-3: Edit a patient**
 - **As an** Admin **I need to** correct a patient's data **so that** records stay accurate.
 - **Behaviour:** `PATCH /patients/:id` accepts any subset of the fields in FR-PAT-1; changing `condition` emits `patient.condition_changed`.
 - **Acceptance criteria:**
-  - [ ] Given I change a condition from `critical` to `stable`, when I save, then the row shows the new value and the condition breakdown on the dashboard reflects it within 2 seconds.
-  - [ ] Given an invalid email, when I save, then the API returns `422 VALIDATION_FAILED` and the stored record is unchanged.
+  - [x] Given I change a condition from `critical` to `stable`, when I save, then the row shows the new value and the condition breakdown on the dashboard reflects it within 2 seconds.
+  - [x] Given an invalid email, when I save, then the API returns `422 VALIDATION_FAILED` and the stored record is unchanged.
 
 **FR-PAT-4: Delete a patient**
 - **As an** Admin **I need to** delete a patient **so that** removed records are gone.
 - **Behaviour:** `DELETE /patients/:id` returns `204`; the UI behaves as in FR-DOC-5.
 - **Acceptance criteria:**
-  - [ ] Given an existing patient, when I confirm, then a following `GET /patients/:id` returns `404 NOT_FOUND`.
-  - [ ] Given a Viewer, when they call the endpoint, then the API returns `403 FORBIDDEN`.
+  - [x] Given an existing patient, when I confirm, then a following `GET /patients/:id` returns `404 NOT_FOUND`.
+  - [x] Given a Viewer, when they call the endpoint, then the API returns `403 FORBIDDEN`.
 
 ### Dashboard
 
 **FR-DASH-1: Totals**
 - **Behaviour:** `GET /dashboard/summary` returns total doctors and total patients, read from `analytics_totals`.
 - **Acceptance criteria:**
-  - [ ] Given a seeded dataset, when the projection has settled, then both totals equal `countDocuments` on the source collections.
-  - [ ] Given a response time budget of 200 ms, when I load the dashboard, then p95 of the call is under 200 ms.
+  - [x] Given a seeded dataset, when the projection has settled, then both totals equal `countDocuments` on the source collections.
+  - [x] Given a response time budget of 200 ms, when I load the dashboard, then p95 of the call is under 200 ms.
 
 **FR-DASH-2: Patients per doctor**
 - **Behaviour:** `GET /dashboard/patients-per-doctor` returns the top 10 doctors by patient count as a bar chart, with names.
 - **Acceptance criteria:**
-  - [ ] Given doctors with different counts, when I load the chart, then bars are sorted descending and each value equals that doctor's `patientCount`.
-  - [ ] Given fewer than 10 doctors, when I load the chart, then only existing doctors are shown.
+  - [x] Given doctors with different counts, when I load the chart, then bars are sorted descending and each value equals that doctor's `patientCount`.
+  - [x] Given fewer than 10 doctors, when I load the chart, then only existing doctors are shown.
 
 **FR-DASH-3: Registrations over time**
 - **Behaviour:** `GET /dashboard/timeseries` returns patients (and doctors) created per day, week or month for a window of 7, 30 or 90 days or a custom `from`/`to`; days without data return 0.
 - **Rules:** a custom range is at most 366 days.
 - **Acceptance criteria:**
-  - [ ] Given the 30-day window, when I load the chart, then the series has exactly 30 daily points, with zeros where nothing was created.
-  - [ ] Given a custom range longer than 366 days, when I submit, then the API returns `422 VALIDATION_FAILED`.
+  - [x] Given the 30-day window, when I load the chart, then the series has exactly 30 daily points, with zeros where nothing was created.
+  - [x] Given a custom range longer than 366 days, when I submit, then the API returns `422 VALIDATION_FAILED`.
 
 **FR-DASH-4: Patients by condition**
 - **Behaviour:** `GET /dashboard/conditions` returns counts for the four conditions, shown as a chart with a table alternative for screen readers.
 - **Acceptance criteria:**
-  - [ ] Given any dataset, when I load it, then the four counts sum to total patients.
-  - [ ] Given the projection is rebuilt with `make rebuild-analytics`, when it finishes, then the counts are identical to before the rebuild.
+  - [x] Given any dataset, when I load it, then the four counts sum to total patients.
+  - [x] Given the projection is rebuilt with `make rebuild-analytics`, when it finishes, then the counts are identical to before the rebuild.
 
 ### Platform
 
 **FR-API-1: Uniform responses and errors**
 - **Rules:** success is `{ data, meta? }`; errors are RFC 9457 Problem Details with `code`, `requestId` and, where relevant, `errors[]` or `retryAfter`; every response carries `X-Request-Id`; catalogue and examples are in `API_CONTRACT.md`.
 - **Acceptance criteria:**
-  - [ ] Given any failing request, when I read the response, then `Content-Type` is `application/problem+json` and `code` is one of the ten catalogued values.
-  - [ ] Given an unexpected exception, when it occurs, then the body is `500 INTERNAL_ERROR` with no stack trace and the log line carries the same `requestId`.
+  - [x] Given any failing request, when I read the response, then `Content-Type` is `application/problem+json` and `code` is one of the ten catalogued values.
+  - [x] Given an unexpected exception, when it occurs, then the body is `500 INTERNAL_ERROR` with no stack trace and the log line carries the same `requestId`.
 
 **FR-API-2: Rate limiting**
 - **Rules:** the policies in `API_CONTRACT.md`; headers `RateLimit-Policy`, `RateLimit` and, on rejection, `Retry-After`; client IP comes from the proxy's `X-Forwarded-For` and nothing else.
 - **Acceptance criteria:**
-  - [ ] Given 61 write requests from one user within 60 seconds, when the 61st arrives, then it receives `429 RATE_LIMITED` and `Retry-After` between 1 and 60.
-  - [ ] Given a request with a forged `X-Forwarded-For` sent directly to the API from outside the proxy network, when it arrives, then the forged value is ignored.
+  - [x] Given 61 write requests from one user within 60 seconds, when the 61st arrives, then it receives `429 RATE_LIMITED` and `Retry-After` between 1 and 60.
+  - [x] Given a request with a forged `X-Forwarded-For` sent directly to the API from outside the proxy network, when it arrives, then the forged value is ignored.
 
 **FR-API-3: Swagger documentation**
 - **Rules:** OpenAPI 3.1 generated from the Zod contracts, served at `/openapi.json`, UI at `/docs`.
 - **Acceptance criteria:**
-  - [ ] Given the registered routes, when the contract test runs, then every route is in the document and every documented route is registered.
+  - [x] Given the registered routes, when the contract test runs, then every route is in the document and every documented route is registered.
   - [ ] Given I open `/docs`, when I authorize with the seeded admin, then I can execute `GET /doctors` from the page.
 
 ### Interface
@@ -238,8 +238,8 @@ Success is measured on a seeded dataset of 10,000 doctors and 100,000 patients: 
 **FR-UX-1: Navigation and layout**
 - **Behaviour:** persistent navigation between Dashboard, Doctors and Patients; the layout is designed at 390, 768 and 1440 px; the active section is indicated.
 - **Acceptance criteria:**
-  - [ ] Given a 390 px viewport, when I use any page, then there is no horizontal scrolling and every action is reachable.
-  - [ ] Given I use only the keyboard, when I move through a page, then focus order follows reading order and focus is visible.
+  - [x] Given a 390 px viewport, when I use any page, then there is no horizontal scrolling and every action is reachable.
+  - [x] Given I use only the keyboard, when I move through a page, then focus order follows reading order and focus is visible.
 
 **FR-UX-2: Loading, empty and error states**
 - **Behaviour:** every list and chart has a skeleton while loading, an empty state, and an error state with a retry; a `429` shows the wait time and retries once after `Retry-After`.
@@ -251,7 +251,7 @@ Success is measured on a seeded dataset of 10,000 doctors and 100,000 patients: 
 - **Behaviour:** `README.md` has the five required sections: Description, Setup Guide with `.env.example`, System Architecture, Technical Decisions (two, in depth), Visual Evidence (desktop and mobile screenshots).
 - **Acceptance criteria:**
   - [ ] Given a clean machine with Docker, when I follow the setup guide, then `make up` starts the stack and I can sign in with the seeded admin.
-  - [ ] Given the README, when I count screenshots, then there are at least 3 desktop and 3 mobile images.
+  - [x] Given the README, when I count screenshots, then there are at least 3 desktop and 3 mobile images.
 
 ## 6. User Journeys
 
