@@ -304,7 +304,7 @@ describe('identity', () => {
       const fourth = await write();
       expect(fourth.status).toBe(429);
       expect(fourth.headers['ratelimit-policy']).toBe(
-        '"ip-global";q=300;w=60, "user-write";q=3;w=60',
+        '"ip-global";q=600;w=60, "user-write";q=3;w=60',
       );
       expect(fourth.headers['ratelimit']).toMatch(/^"user-write";r=0;t=\d+$/);
       expect(Number(fourth.headers['retry-after'])).toBeGreaterThan(0);

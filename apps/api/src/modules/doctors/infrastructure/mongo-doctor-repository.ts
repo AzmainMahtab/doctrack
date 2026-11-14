@@ -9,6 +9,7 @@ import type { Doctor, DoctorProps } from '../domain/doctor.ts';
 import {
   DoctorRepository,
   type DayCount,
+  type DoctorFacets,
   type DoctorRow,
   type RankedDoctor,
 } from '../domain/ports.ts';
@@ -154,5 +155,15 @@ export class MongoDoctorRepository extends DoctorRepository {
       .limit(limit)
       .toArray();
     return docs.map((d) => ({ id: d._id, name: d.name, patientCount: d.patientCount }));
+  }
+
+  async facets(): Promise<DoctorFacets> {
+    const options = sessionOptions(this.context);
+    const [specializations, hospitals] = await Promise.all([
+      this.doctors.distinct('specialization', {}, options),
+      this.doctors.distinct('hospital', {}, options),
+    ]);
+    const sort = (values: string[]) => values.sort((a, b) => a.localeCompare(b));
+    return { specializations: sort(specializations), hospitals: sort(hospitals) };
   }
 }

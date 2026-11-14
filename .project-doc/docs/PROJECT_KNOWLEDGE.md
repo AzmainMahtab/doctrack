@@ -50,6 +50,7 @@ doctrack/
 | `make dev` | Infrastructure in Docker, api + worker + web on the host with hot reload |
 | `make check` | lint, format, typecheck, `check:arch`, unit tests, build |
 | `make test-integration` | Tests against real MongoDB, Redis and NATS |
+| `make test-e2e` | Playwright journeys at 390 and 1440 against the running stack (`make up && make seed` first) |
 | `make migrate` | Ensure MongoDB indexes |
 | `make seed` | Create the demo accounts `admin@doctrack.dev` and `viewer@doctrack.dev` (passwords from `SEED_*` in `.env`) |
 | `make rebuild-analytics` | Recompute the dashboard read model; `ARGS=--check` only verifies |

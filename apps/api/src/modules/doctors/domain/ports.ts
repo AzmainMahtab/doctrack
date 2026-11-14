@@ -18,6 +18,11 @@ export interface RankedDoctor {
   patientCount: number;
 }
 
+export interface DoctorFacets {
+  specializations: string[];
+  hospitals: string[];
+}
+
 export abstract class DoctorRepository {
   abstract insert(doctor: Doctor): Promise<void>;
   abstract findById(id: string): Promise<DoctorProps | null>;
@@ -26,4 +31,5 @@ export abstract class DoctorRepository {
   abstract countAll(): Promise<number>;
   abstract registrationsByDay(): Promise<DayCount[]>;
   abstract topByPatientCount(limit: number): Promise<RankedDoctor[]>;
+  abstract facets(): Promise<DoctorFacets>;
 }

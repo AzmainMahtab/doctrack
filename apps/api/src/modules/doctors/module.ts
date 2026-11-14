@@ -4,6 +4,7 @@ import type { Clock, EventBus, UnitOfWork } from '../../shared/application/index
 import {
   ApplyPatientCountChange,
   DoctorsPublicApi,
+  GetDoctorFacets,
   GetDoctorQuery,
   ListDoctorsQuery,
   RegisterDoctorHandler,
@@ -27,6 +28,7 @@ export function createDoctorsModule(deps: DoctorsDeps) {
       register: new RegisterDoctorHandler(repository, deps.uow, deps.eventBus, deps.clock),
       listDoctors: new ListDoctorsQuery(repository),
       getDoctor: new GetDoctorQuery(repository),
+      facets: new GetDoctorFacets(repository),
     }),
     consumers: [new PatientCountConsumer(new ApplyPatientCountChange(repository))],
     api: new DoctorsPublicApi(repository),

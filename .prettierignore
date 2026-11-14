@@ -7,3 +7,4 @@ pnpm-lock.yaml
 secrets
 .project-doc
 apps/web/next-env.d.ts
+test-results

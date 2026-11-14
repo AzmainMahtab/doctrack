@@ -1,4 +1,4 @@
-.PHONY: help init up down dev dev-down logs ps migrate seed rebuild-analytics check test test-integration build clean
+.PHONY: help init up down dev dev-down logs ps migrate seed rebuild-analytics check test test-integration test-e2e build clean
 
 -include .env
 export
@@ -75,6 +75,9 @@ test: ## Unit tests
 test-integration: ## Integration tests against real MongoDB, Redis and NATS
 	$(COMPOSE_DEV) up -d --wait $(INFRA)
 	@$(HOST_ENV) NODE_ENV=test pnpm test:integration $(TEST)
+
+test-e2e: ## Browser journeys against the running stack (make up && make seed first)
+	cd apps/web && PLAYWRIGHT_CHROMIUM_EXECUTABLE=$${PLAYWRIGHT_CHROMIUM_EXECUTABLE:-/usr/bin/chromium} pnpm e2e
 
 build: ## Build every workspace
 	pnpm build

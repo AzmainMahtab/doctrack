@@ -55,6 +55,11 @@ export const DoctorListQuerySchema = PageQuerySchema.extend({
   sort: z.enum(DOCTOR_SORTS).default('-createdAt'),
 }).refine(rangeIsOrdered, { message: '`from` must not be after `to`', path: ['from'] });
 
+export const DoctorFacetsSchema = z
+  .object({ specializations: z.array(z.string()), hospitals: z.array(z.string()) })
+  .openapi('DoctorFacets');
+
+export type DoctorFacets = z.infer<typeof DoctorFacetsSchema>;
 export type CreateDoctor = z.infer<typeof CreateDoctorSchema>;
 export type Doctor = z.infer<typeof DoctorSchema>;
 export type DoctorRow = z.infer<typeof DoctorRowSchema>;

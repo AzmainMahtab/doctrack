@@ -1,5 +1,6 @@
 import {
   CreateDoctorSchema,
+  DoctorFacetsSchema,
   DoctorListQuerySchema,
   DoctorRowSchema,
   DoctorSchema,
@@ -10,6 +11,7 @@ import {
 } from '@doctrack/contracts';
 import { API_PREFIX, defineRoute, type RouteDefinition } from '../../../platform/http/index.ts';
 import type {
+  GetDoctorFacets,
   GetDoctorQuery,
   ListDoctorsQuery,
   RegisterDoctorHandler,
@@ -20,6 +22,7 @@ export interface DoctorRouteDeps {
   register: RegisterDoctorHandler;
   listDoctors: ListDoctorsQuery;
   getDoctor: GetDoctorQuery;
+  facets: GetDoctorFacets;
 }
 
 const toDoctor = (d: DoctorProps): Doctor => ({
@@ -70,6 +73,16 @@ export function doctorRoutes(deps: DoctorRouteDeps): RouteDefinition[] {
     },
   });
 
+  const facets = defineRoute({
+    method: 'get',
+    path: `${API_PREFIX}/doctors/facets`,
+    summary: 'Distinct specializations and hospitals, for filter controls',
+    tags: ['Doctors'],
+    permission: 'doctors:read',
+    responses: { 200: { description: 'Filter values', schema: single(DoctorFacetsSchema) } },
+    handler: async () => ({ status: 200, data: await deps.facets.execute() }),
+  });
+
   const show = defineRoute({
     method: 'get',
     path: `${API_PREFIX}/doctors/:id`,
@@ -87,5 +100,5 @@ export function doctorRoutes(deps: DoctorRouteDeps): RouteDefinition[] {
     }),
   });
 
-  return [create, index, show];
+  return [create, index, facets, show];
 }
