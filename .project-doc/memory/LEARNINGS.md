@@ -30,3 +30,8 @@
 - A test asserting that events carry no personal data found the staff email in `user.logged_in`; assert on the serialised audit log, not on one payload.
 - An `afterCommit` hook must run after the consumer's transaction commits and before the ack, and its failure must not retry the message; otherwise the cache could be repopulated with data from before the commit.
 - A projection built from deltas cannot be rebuilt safely while events are in flight; the rebuild waits for idle and `--check` reports any double count.
+- Pencil drops a numeric variable used as `width` or `height` (`"$control-h"`) without an error; use plain numbers for sizes and variables for colours, type sizes, radii and families.
+- Pencil `execute` calls do not share helper functions; redefine them in every call. A line starting with `[` after a statement without a semicolon is parsed as an index into the previous expression; prefix such lines with `;`.
+- Screenshots of nodes outside the user's viewport come back blank or truncated. Export the node to HTML and render it with headless Chromium to look at it, and read `ctx.bounds` for geometry: the HTML export lets flex children overflow where Pencil's own layout does not, so trust the bounds for sizes.
+- A token pass with `Get(visit)` over the whole document converts literal font sizes to variables in one call (202 nodes), including inside reusable components.
+- A sentence with differently coloured figures cannot be one text node: build it as a row of text nodes with a gap and no leading or trailing spaces.

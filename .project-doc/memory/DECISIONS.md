@@ -57,6 +57,13 @@
 | D-51 | 2026-11-14 | Modules expose read-only public APIs (`DoctorsPublicApi`, `PatientsPublicApi`) for counts and rankings; analytics never reads another module's collections | Module boundaries hold for the rebuild too |
 | D-52 | 2026-11-14 | The MongoDB container runs with `nofile` 64000 | At 1,024 open files MongoDB stopped accepting connections during the integration run |
 | D-53 | 2026-11-14 | Identity events carry no email address (`user.logged_in` has the role only; `user.deactivated` is empty) | Event payloads flow into the stream and the audit log; personal data stays out |
+| D-54 | 2026-11-14 | Design direction: the register. Ruled ledger tables, sentences before charts, hairlines instead of cards. Newsreader for naming, IBM Plex Sans for data, one accent `#2145D6`, light theme only in v1 | Measured against Linear and Stripe; fits a scan-and-correct admin tool. Dark mode adds a second contrast table for no v1 requirement |
+| D-55 | 2026-11-14 | Type scale 12, 13, 14, 18, 24, 32, 48, 64 with 14 px body; tabular numerals for every figure | Density for list work; columns of numbers align |
+| D-56 | 2026-11-14 | Persistent sidebar from 1024 px; below it a top bar with a menu sheet. Tables drop low-priority columns at 768 and become ledger entries at 390 | One navigation model per width; no horizontal scrolling |
+| D-57 | 2026-11-14 | No cards and no shadows; one exception, the confirm dialog's shadow over a scrim. Radius 4 px, 2 px on chart marks, pill on condition tags | Elevation by structure, not decoration |
+| D-58 | 2026-11-14 | A condition is always shown as colour plus its text label; the chart legend always lists label and count | Colour alone is not an accessible signal |
+| D-59 | 2026-11-14 | Canvas component names equal code names; each page spec carries the component inventory with code paths under `apps/web/src/components/` and `apps/web/src/features/<feature>/components/` | The build agent never has to guess a file name |
+| D-60 | 2026-11-14 | The `.pen` file stays at `/home/odin/Documents/doctrack.pen`, outside the repository; the guidelines and page specs in `.project-doc/design/` are the committed source | The `.pen` format is binary and encrypted; the written specs are what survives the tool |
 
 ## Open questions
 

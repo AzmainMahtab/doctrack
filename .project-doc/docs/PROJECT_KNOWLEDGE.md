@@ -65,6 +65,8 @@ doctrack/
 | `REQUIREMENTS.md` | Requirement IDs traced to the brief, out-of-scope list, assumptions |
 | `DATA_MODEL.md` | Collections, fields, indexes, query rules |
 | `API_CONTRACT.md` | Endpoints |
+| `../design/DESIGN-GUIDELINES.md` | The design system: tokens, contrast table, type, space, motion, component rules |
+| `../design/pages/*.md` | One spec per page: sections, component inventory with code paths, responsive behaviour at 390 / 768 / 1440, motion, interaction |
 | `../plan/PHASES.md` | Development phases P0–P7 with gates |
 | `../plan/BACKLOG.md` | Phase checklist |
 | `../status/STATUS.md` | Current state |
