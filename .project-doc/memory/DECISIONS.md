@@ -64,6 +64,13 @@
 | D-58 | 2026-11-14 | A condition is always shown as colour plus its text label; the chart legend always lists label and count | Colour alone is not an accessible signal |
 | D-59 | 2026-11-14 | Canvas component names equal code names; each page spec carries the component inventory with code paths under `apps/web/src/components/` and `apps/web/src/features/<feature>/components/` | The build agent never has to guess a file name |
 | D-60 | 2026-11-14 | The `.pen` file stays at `/home/odin/Documents/doctrack.pen`, outside the repository; the guidelines and page specs in `.project-doc/design/` are the committed source | The `.pen` format is binary and encrypted; the written specs are what survives the tool |
+| D-61 | 2026-11-14 | The API proxy is an owned route handler (`app/api/v1/[...path]`), not a rewrite. It sends one `X-Forwarded-For`: the last entry of the incoming header (appended by the edge), else `X-Real-IP`, else `127.0.0.1` | A client-supplied leading entry can never choose the IP the API rate limits on |
+| D-62 | 2026-11-14 | Sign-in, reading, filtering and pagination work without JavaScript; creating, editing and deleting need it. The no-JS mutation pages in the specs are dropped | Admin tool; five extra server-action pages add surface without a requirement |
+| D-63 | 2026-11-14 | Pages are server components that validate `searchParams`, prefetch through a cookie-forwarding client and hand a dehydrated TanStack Query cache to client components | First paint has data; client navigation reuses the same keys |
+| D-64 | 2026-11-14 | Session refresh lives in `proxy.ts`: expired or missing access token with a refresh cookie triggers `/auth/refresh`, new cookies go on both the forwarded request and the response. It also sets the nonce CSP | Server components see fresh cookies on the same request; real verification stays in the API |
+| D-65 | 2026-11-14 | No chart library. Bars are elements built by a pure `buildBars`; dashboard is server-rendered with link-based controls | Matches the drawn design exactly, accessible, zero bundle. Supersedes the Recharts choice in D-13 |
+| D-66 | 2026-11-14 | `GET /doctors/facets` supplies filter values; the patients doctor filter is an async combobox over `GET /doctors?q=` | Selects need their options; a doctor list can be large |
+| D-67 | 2026-11-14 | Rate limits raised: `user-read` 120 to 300 per minute, `ip-global` 300 to 600 | One server-rendered page makes several reads; measured exhaustion by a single admin during normal use and test runs |
 
 ## Open questions
 

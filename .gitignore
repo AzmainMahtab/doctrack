@@ -12,3 +12,5 @@ secrets/*
 !secrets/.gitkeep
 *.tsbuildinfo
 next-env.d.ts
+apps/web/test-results
+apps/web/playwright-report

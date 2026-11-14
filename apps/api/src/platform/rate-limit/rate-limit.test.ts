@@ -30,7 +30,7 @@ describe('rate limit headers', () => {
     const { res, headers } = fakeResponse();
     recordDecision(res, decision('ip-global', 250, 40));
     recordDecision(res, decision('user-read', 87, 34));
-    expect(headers['RateLimit-Policy']).toBe('"ip-global";q=300;w=60, "user-read";q=120;w=60');
+    expect(headers['RateLimit-Policy']).toBe('"ip-global";q=600;w=60, "user-read";q=300;w=60');
     expect(headers['RateLimit']).toBe('"user-read";r=87;t=34');
   });
 
@@ -44,11 +44,11 @@ describe('rate limit headers', () => {
 
 describe('policy catalogue', () => {
   it('matches the documented limits', () => {
-    expect(POLICIES['ip-global']).toMatchObject({ limit: 300, windowSeconds: 60 });
+    expect(POLICIES['ip-global']).toMatchObject({ limit: 600, windowSeconds: 60 });
     expect(POLICIES['login-account']).toMatchObject({ limit: 5, windowSeconds: 900 });
     expect(POLICIES['login-ip']).toMatchObject({ limit: 20, windowSeconds: 900 });
     expect(POLICIES.refresh).toMatchObject({ limit: 30, windowSeconds: 900 });
-    expect(POLICIES['user-read']).toMatchObject({ limit: 120, windowSeconds: 60 });
+    expect(POLICIES['user-read']).toMatchObject({ limit: 300, windowSeconds: 60 });
     expect(POLICIES['user-write']).toMatchObject({ limit: 60, windowSeconds: 60 });
   });
 });

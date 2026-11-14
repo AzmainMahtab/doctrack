@@ -8,5 +8,5 @@ The ordered work is in `PHASES.md` (P0–P7), each phase with its deliverables a
 - [x] P3 Doctors and patients API
 - [x] P4 Analytics and audit
 - [x] P5 Design system
-- [ ] P6 Web app
+- [x] P6 Web app
 - [ ] P7 Hardening and delivery

@@ -35,3 +35,9 @@
 - Screenshots of nodes outside the user's viewport come back blank or truncated. Export the node to HTML and render it with headless Chromium to look at it, and read `ctx.bounds` for geometry: the HTML export lets flex children overflow where Pencil's own layout does not, so trust the bounds for sizes.
 - A token pass with `Get(visit)` over the whole document converts literal font sizes to variables in one call (202 nodes), including inside reusable components.
 - A sentence with differently coloured figures cannot be one text node: build it as a row of text nodes with a gap and no leading or trailing spaces.
+- Next 16: a server component cannot pass a function or component (a lucide icon) as a prop to a client component; mark the file that renders the client component `'use client'` or pass a name.
+- A form resolver returns transformed values; running the same conversion again on them (local datetime to ISO) yields Invalid Date. Make conversions idempotent and diff against the form value, not the server value.
+- Next injects `#__next-route-announcer__` with `role="alert"`; a test that looks for the page's alert by role must scope past it.
+- Server rendering multiplies reads: a page of three sections is three API calls, so per-user read limits sized for clicks are exhausted by navigation alone. Size limits per page view, and show a calm notice on 429 and 503.
+- `niceScale` with a maximum below the tick count produced fractional ticks (0.3, 0.6) on an empty chart; counts need a step of at least 1.
+

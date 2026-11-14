@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createHarness, type Harness } from '../../platform/testing/harness.ts';
 import { API, Client, PASSWORD, signIn } from '../../platform/testing/http-helpers.ts';
 import { createIdentityApp } from '../../platform/testing/identity-app.ts';
+import { doctorDoc } from '../../platform/testing/seed-data.ts';
 
 type Built = Awaited<ReturnType<typeof createIdentityApp>>;
 
@@ -209,6 +210,26 @@ describe('doctors API', () => {
       expect(range.status).toBe(422);
       expect((await admin.get(`${API}/doctors?sort=bogus`)).status).toBe(422);
       expect((await admin.get(`${API}/doctors?page=0`)).status).toBe(422);
+    });
+  });
+
+  describe('facets', () => {
+    it('lists the distinct specializations and hospitals, sorted, and is not mistaken for an id', async () => {
+      await h.mongo.db.collection('doctors').deleteMany({});
+      await h.mongo.db
+        .collection('doctors')
+        .insertMany([
+          doctorDoc(1, { specialization: 'Neurology', hospital: 'City General' }),
+          doctorDoc(2, { specialization: 'Cardiology', hospital: 'City General' }),
+          doctorDoc(3, { specialization: 'Cardiology', hospital: 'Lakeside Clinic' }),
+        ]);
+      const res = await viewer.get(`${API}/doctors/facets`);
+      expect(res.status).toBe(200);
+      expect(res.body.data).toEqual({
+        specializations: ['Cardiology', 'Neurology'],
+        hospitals: ['City General', 'Lakeside Clinic'],
+      });
+      expect((await anonymous.get(`${API}/doctors/facets`)).status).toBe(401);
     });
   });
 

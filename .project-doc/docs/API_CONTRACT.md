@@ -72,11 +72,11 @@ Redis-backed, per endpoint. A request is checked against several policies in ord
 
 | Policy | Key | Limit | Counts |
 |--------|-----|-------|--------|
-| `ip-global` | client IP | 300 / 60 s | every request, before auth |
+| `ip-global` | client IP | 600 / 60 s | every request, before auth |
 | `login-ip` | client IP | 20 / 15 min | failed logins |
 | `login-account` | client IP + normalised email | 5 / 15 min | failed logins only; reset on success |
 | `refresh` | user | 30 / 15 min | refresh calls |
-| `user-read` | user | 120 / 60 s | `GET` |
+| `user-read` | user | 300 / 60 s | `GET` |
 | `user-write` | user | 60 / 60 s | `POST`, `PATCH`, `DELETE` |
 
 Order: `ip-global` → authentication → the route's policy. A request rejected by an earlier policy consumes nothing from later ones. `/health` is exempt. A login `429` has the same body whether or not the account exists.
@@ -86,7 +86,7 @@ Order: `ip-global` → authentication → the route's policy. A request rejected
 Structured-field headers from the IETF `draft-ietf-httpapi-ratelimit-headers` (still a draft, so treat the format as subject to change):
 
 ```
-RateLimit-Policy: "ip-global";q=300;w=60, "user-read";q=120;w=60
+RateLimit-Policy: "ip-global";q=600;w=60, "user-read";q=300;w=60
 RateLimit: "user-read";r=87;t=34
 ```
 
@@ -100,7 +100,7 @@ Example:
 HTTP/1.1 429 Too Many Requests
 Content-Type: application/problem+json
 Retry-After: 34
-RateLimit-Policy: "ip-global";q=300;w=60, "user-read";q=120;w=60
+RateLimit-Policy: "ip-global";q=600;w=60, "user-read";q=300;w=60
 RateLimit: "user-read";r=0;t=34
 
 { "type": "https://doctrack.app/problems/rate-limited", "title": "Too many requests",
@@ -131,6 +131,7 @@ Redis is a hard dependency (blacklist and limiter). When it is down, login and e
 |--------|------|-----------|---------|
 | GET | `/doctors` | `doctors:read` | list. Query: `page`, `limit`, `q` (word prefixes), `specialization`, `hospital`, `from`, `to` (created date, inclusive), `sort` (`-createdAt` default, `createdAt`, `name`, `-name`, `-patientCount`) |
 | POST | `/doctors` | `doctors:write` | create |
+| GET | `/doctors/facets` | `doctors:read` | `{ specializations, hospitals }`: the distinct values, sorted, for filter controls |
 | GET | `/doctors/:id` | `doctors:read` | one doctor |
 | GET | `/doctors/:id/patients` | `patients:read` | that doctor's patients. Query: `page`, `limit`, `q`, `condition` |
 | POST | `/doctors/:id/patients` | `patients:write` | add a patient under the doctor |

@@ -1,1 +1,183 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/newsreader/index.css';
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+
+@theme {
+  --color-bg: #ffffff;
+  --color-bg-sunken: #f4f5f7;
+  --color-ink: #0f1a2a;
+  --color-ink-muted: #4b5870;
+  --color-ink-subtle: #5e6a82;
+  --color-border: #dde1e8;
+  --color-border-input: #7f8a9f;
+  --color-accent: #2145d6;
+  --color-accent-hover: #1a37ae;
+  --color-accent-ink: #ffffff;
+  --color-accent-wash: #e9eefc;
+  --color-danger: #b3261e;
+  --color-danger-ink: #ffffff;
+  --color-danger-wash: #fbe9e7;
+  --color-scrim: #0f1a2a99;
+  --color-stable: #5e6a82;
+  --color-stable-wash: #ebeef3;
+  --color-stable-ink: #3f4c66;
+  --color-observation: #b26a00;
+  --color-observation-wash: #fdf1dc;
+  --color-observation-ink: #7a4a00;
+  --color-critical: #c4372e;
+  --color-critical-wash: #fbe9e7;
+  --color-critical-ink: #8c1c15;
+  --color-recovered: #2e8057;
+  --color-recovered-wash: #e4f3eb;
+  --color-recovered-ink: #1b5e40;
+
+  --font-display: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
+  --font-text: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --text-display: clamp(2.5rem, 1.94rem + 2.29vw, 4rem);
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.02em;
+  --text-figure: clamp(2.25rem, 1.97rem + 1.14vw, 3rem);
+  --text-figure--line-height: 1;
+  --text-figure--letter-spacing: -0.02em;
+  --text-h1: clamp(1.75rem, 1.66rem + 0.38vw, 2rem);
+  --text-h1--line-height: 1.15;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h2: 1.5rem;
+  --text-h2--line-height: 1.2;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h3: 1.125rem;
+  --text-h3--line-height: 1.3;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.5;
+  --text-small: 0.8125rem;
+  --text-small--line-height: 1.4;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.3;
+
+  --radius-ui: 4px;
+  --radius-mark: 2px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-standard: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  --spacing: 4px;
+}
+
+@layer base {
+  html {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-text);
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--color-accent-wash);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  h1,
+  h2,
+  h3 {
+    margin: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes bar-rise {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes rank-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
