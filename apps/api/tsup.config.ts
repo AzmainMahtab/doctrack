@@ -6,6 +6,8 @@ export default defineConfig({
     'src/worker.ts',
     'src/migrate.ts',
     'src/seed.ts',
+    'src/seed-scale.ts',
+    'src/explain-check.ts',
     'src/rebuild-analytics.ts',
   ],
   format: ['esm'],

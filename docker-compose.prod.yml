@@ -1,0 +1,27 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN to the public host name}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web: { condition: service_healthy }
+      api: { condition: service_healthy }
+    restart: unless-stopped
+    networks: [internal]
+
+  api:
+    ports: !reset []
+
+  web:
+    ports: !reset []
+
+volumes:
+  caddy-data:
+  caddy-config:

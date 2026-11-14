@@ -40,4 +40,8 @@
 - Next injects `#__next-route-announcer__` with `role="alert"`; a test that looks for the page's alert by role must scope past it.
 - Server rendering multiplies reads: a page of three sections is three API calls, so per-user read limits sized for clicks are exhausted by navigation alone. Size limits per page view, and show a calm notice on 429 and 503.
 - `niceScale` with a maximum below the tick count produced fractional ticks (0.3, 0.6) on an empty chart; counts need a step of at least 1.
+- A full disk (`No space left on device` in `mongod.lock`) shows up as Mongo restarting with exit code 100, then every dependent service unhealthy. Check `df -h /` before reading Mongo logs for anything cleverer.
+- `docker image prune -a` frees images no container uses, and the next build then re-pulls its base image; on a slow network that costs more than the build.
+- Lighthouse reports a console error for a missing `/favicon.ico`; an `app/icon.svg` removes it and the request.
+- Seed data spread uniformly over a year produces a flat chart that looks fake in screenshots; skew toward recent days.
 
