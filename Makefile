@@ -1,4 +1,4 @@
-.PHONY: help init up down dev dev-down logs ps migrate seed deploy seed-scale explain-check load-check rebuild-analytics check test test-integration test-e2e build clean
+.PHONY: help init up down dev dev-down logs ps migrate seed deploy seed-demo seed-scale explain-check load-check rebuild-analytics check test test-integration test-e2e build clean
 
 -include .env
 export
@@ -60,21 +60,27 @@ migrate: ## Ensure MongoDB indexes
 	$(COMPOSE_DEV) up -d --wait $(INFRA)
 	@$(HOST_ENV) pnpm --filter @doctrack/api migrate
 
-seed: ## Create the demo admin and viewer accounts (stack must be up)
-	$(COMPOSE) run --rm api node dist/seed.js
+seed: ## Create the demo accounts and a working data set: 24 doctors, 320 patients (stack must be up)
+	$(COMPOSE) run --rm --no-deps api node dist/seed.js
+	$(COMPOSE) run --rm --no-deps api node dist/seed-demo.js
+	$(COMPOSE) run --rm --no-deps worker node dist/rebuild-analytics.js
+
+seed-demo: ## Replace the demo data set (RESET=1) or add it when missing
+	$(COMPOSE) run --rm --no-deps api node dist/seed-demo.js $(if $(RESET),--reset)
+	$(COMPOSE) run --rm --no-deps worker node dist/rebuild-analytics.js
 
 rebuild-analytics: ## Recompute the dashboard read model from the data (ARGS=--check only verifies)
-	$(COMPOSE) run --rm worker node dist/rebuild-analytics.js $(ARGS)
+	$(COMPOSE) run --rm --no-deps worker node dist/rebuild-analytics.js $(ARGS)
 
 check: ## Full quality gate: lint, format, typecheck, architecture, unit tests, build
 	pnpm check
 
 seed-scale: ## Load 10k doctors and 100k patients and rebuild the dashboard projection (RESET=1 replaces them)
-	$(COMPOSE) run --rm api node dist/seed-scale.js $(if $(RESET),--reset)
-	$(COMPOSE) run --rm worker node dist/rebuild-analytics.js
+	$(COMPOSE) run --rm --no-deps api node dist/seed-scale.js $(if $(RESET),--reset)
+	$(COMPOSE) run --rm --no-deps worker node dist/rebuild-analytics.js
 
 explain-check: ## Run explain() on the hot list queries; fails on any COLLSCAN
-	$(COMPOSE) run --rm api node dist/explain-check.js
+	$(COMPOSE) run --rm --no-deps api node dist/explain-check.js
 
 load-check: ## p95 latency of the list and dashboard endpoints against the running stack (load .env first)
 	@set -a && . ./.env && set +a && node scripts/load-check.mjs

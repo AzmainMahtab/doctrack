@@ -136,6 +136,11 @@ services:
       dockerfile: apps/web/Dockerfile
     environment:
       API_URL: http://api:8080
+      DEMO_MODE: ${DEMO_MODE:-false}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@doctrack.dev}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      SEED_VIEWER_EMAIL: ${SEED_VIEWER_EMAIL:-viewer@doctrack.dev}
+      SEED_VIEWER_PASSWORD: ${SEED_VIEWER_PASSWORD:-}
     ports:
       - '${WEB_HOST_PORT:-3000}:3000'
     depends_on:
