@@ -74,6 +74,7 @@
 | D-68 | 2026-11-14 | Scale data is loaded by `make seed-scale`, which bulk-inserts straight into MongoDB and then runs `rebuild-analytics`; it bypasses the outbox | 110,000 events through the relay would measure the relay, not the queries; the rebuild is the documented repair path (D-49) |
 | D-69 | 2026-11-14 | The app sends `noindex`; the Lighthouse SEO score is therefore 60 on every page (`is-crawlable`) and is not a target | A private admin tool should not be indexed; the PRD sets only an accessibility target |
 | D-70 | 2026-11-14 | Production runs behind Caddy (`docker-compose.prod.yml`): automatic TLS, HSTS, only ports 80 and 443 published, `/docs` and `/openapi.json` routed to the API, everything else to the web app | Caddy sets the client address on `X-Forwarded-For`, which D-61 depends on; HSTS needs HTTPS and so belongs at the edge |
+| D-71 | 2026-11-16 | `make seed` loads the two accounts and a curated data set (24 doctors, 320 patients, 90 days of registrations) by bulk insert, then rebuilds the projection; `make seed-demo RESET=1` replaces it. The sign-in screen offers the two accounts as a role switch when `DEMO_MODE=true`, read at request time on the server | A fresh clone is usable at once; demo credentials never reach the page unless the flag is set |
 
 ## Open questions
 

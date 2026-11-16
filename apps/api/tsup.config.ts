@@ -7,6 +7,7 @@ export default defineConfig({
     'src/migrate.ts',
     'src/seed.ts',
     'src/seed-scale.ts',
+    'src/seed-demo.ts',
     'src/explain-check.ts',
     'src/rebuild-analytics.ts',
   ],

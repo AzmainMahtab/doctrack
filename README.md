@@ -13,7 +13,7 @@ Requirements: Docker with Compose, Node 24, pnpm.
 ```bash
 make init       # .env with generated secrets, Mongo keyfile, JWT keypair, dependencies
 make up         # mongo, redis, nats, api, worker, web
-make seed       # demo admin and viewer accounts
+make seed       # demo accounts plus a working data set: 24 doctors, 320 patients
 make seed-scale # optional: 10,000 doctors and 100,000 patients
 ```
 
@@ -24,7 +24,7 @@ Open <http://localhost:3000>. API documentation (Swagger UI) is served by the AP
 | Admin  | `admin@doctrack.dev`  | `admin-demo-password`  |
 | Viewer | `viewer@doctrack.dev` | `viewer-demo-password` |
 
-These are the values in `.env.example`. Change them before exposing an instance.
+These are the values in `.env.example`. With `DEMO_MODE=true` the sign-in screen offers both accounts as a role switch that fills the form. Set `DEMO_MODE=false` and change the passwords before exposing a real instance.
 
 ### Environment
 
@@ -49,6 +49,7 @@ WEB_HOST_PORT=3000
 
 DOMAIN=doctrack.example.com
 COOKIE_SECURE=false
+DEMO_MODE=true
 ACCESS_TOKEN_TTL_S=900
 REFRESH_TOKEN_TTL_S=604800
 

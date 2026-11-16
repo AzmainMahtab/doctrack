@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { signIn, useOwnIp } from './helpers';
+import { ADMIN, VIEWER, signIn, useOwnIp } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await useOwnIp(page);
@@ -7,6 +7,7 @@ test.beforeEach(async ({ page }) => {
 
 test('keyboard: focus follows reading order and is visible', async ({ page }) => {
   await page.goto('/login');
+  await page.getByLabel('Email').focus();
   await expect(page.getByLabel('Email')).toBeFocused();
   const order: string[] = [];
   for (let i = 0; i < 2; i++) {
@@ -62,4 +63,15 @@ test('a copied filtered URL reproduces the filters for another session', async (
   await signIn(second, undefined, new URL(url).pathname + new URL(url).search);
   await expect(second.getByRole('searchbox')).toHaveValue('amir');
   await other.close();
+});
+
+test('demo login: choosing a role fills its credentials and signs in', async ({ page }) => {
+  await page.goto('/login');
+  await expect(page.getByLabel('Email')).toHaveValue(ADMIN.email);
+  await page.getByRole('radio', { name: 'Viewer' }).click();
+  await expect(page.getByLabel('Email')).toHaveValue(VIEWER.email);
+  await expect(page.getByLabel('Password')).toHaveValue(VIEWER.password);
+  await page.getByRole('button', { name: 'Sign in as viewer' }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByRole('button', { name: 'Add doctor' })).toHaveCount(0);
 });

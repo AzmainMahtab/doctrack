@@ -45,3 +45,5 @@
 - Lighthouse reports a console error for a missing `/favicon.ico`; an `app/icon.svg` removes it and the request.
 - Seed data spread uniformly over a year produces a flat chart that looks fake in screenshots; skew toward recent days.
 
+
+- `docker compose run` starts and, if the file set differs, recreates the services it depends on. Run from the plain compose file while `make dev` is up, it recreated Mongo, Redis and NATS without the dev port bindings and cut the host servers off. One-off commands use `--no-deps`.
