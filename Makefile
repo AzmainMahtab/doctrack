@@ -44,7 +44,7 @@ dev: ## Infrastructure in Docker, api + worker + web with hot reload on the host
 	@trap 'kill 0' INT TERM; \
 	( $(HOST_ENV) pnpm --filter @doctrack/api dev & \
 	  $(HOST_ENV) pnpm --filter @doctrack/api dev:worker & \
-	  $(HOST_ENV) pnpm --filter @doctrack/web dev & \
+	  $(HOST_ENV) PORT=3000 pnpm --filter @doctrack/web dev & \
 	  wait )
 
 dev-down: ## Stop the development infrastructure
